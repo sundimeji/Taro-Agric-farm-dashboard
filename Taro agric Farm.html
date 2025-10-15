@@ -32,9 +32,6 @@ body{
 .device-list{list-style:none;padding:0;margin:0;}
 .device-list li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.08);}
 .badge{padding:4px 8px;border-radius:999px;font-size:12px;}
-.online{background:rgba(34,197,94,.15);color:var(--good);}
-.offline{background:rgba(239,68,68,.15);color:var(--bad);}
-.logs{height:220px;overflow:auto;background:rgba(0,0,0,.25);border:1px dashed rgba(255,255,255,.08);border-radius:10px;padding:12px;font-family:monospace;}
 .span-2{grid-column:span 2;}
 @media(max-width:1024px){.dash-grid{grid-template-columns:repeat(2,1fr);} .span-2{grid-column:span 2;}}
 @media(max-width:600px){.dash-grid{grid-template-columns:1fr;}}
@@ -51,7 +48,6 @@ body{
 <div class="container">
 <section class="dash-grid">
 
-  <!-- Charts -->
   <div class="kpi-card span-2">
     <div class="kpi-title">Temperature</div>
     <div class="kpi-value" id="temperature">-- °C</div>
@@ -65,18 +61,18 @@ body{
   </div>
 
   <div class="kpi-card span-2">
-    <div class="kpi-title">Air Quality (AQI)</div>
+    <div class="kpi-title">Air Quality (na)</div>
     <div class="kpi-value" id="airQuality">-- AQI</div>
     <canvas id="chart-aqi" height="100"></canvas>
   </div>
 
-  <!-- Sensors -->
   <div class="panel span-2">
     <div class="panel-header"><i class="fas fa-wind"></i><span>Gas Sensors</span></div>
     <ul class="device-list">
       <li><span>NH₃</span><span class="badge" id="nh3">-- ppm</span></li>
       <li><span>NO₂</span><span class="badge" id="no2">-- ppm</span></li>
       <li><span>H₂S</span><span class="badge" id="h2s">-- ppm</span></li>
+      <li><span>VOC</span><span class="badge" id="voc">--</span></li>
     </ul>
   </div>
 
@@ -98,16 +94,7 @@ body{
   <div class="panel">
     <div class="panel-header"><i class="fas fa-volume-up"></i><span>Noise Levels</span></div>
     <ul class="device-list">
-      <li><span>Sound Pressure</span><span class="badge" id="soundPressure">-- dB</span></li>
-      <li><span>Peak</span><span class="badge" id="soundPeak">-- dB</span></li>
-      <li><span>Average</span><span class="badge" id="soundAverage">-- dB</span></li>
-    </ul>
-  </div>
-
-  <div class="panel span-2">
-    <div class="panel-header"><i class="fas fa-microphone"></i><span>Microphone</span></div>
-    <ul class="device-list">
-      <li><span>Audio Level</span><span class="badge" id="microphone">--</span></li>
+      <li><span>Noise Pressure</span><span class="badge" id="noisePressure">-- dB</span></li>
     </ul>
   </div>
 
@@ -121,53 +108,67 @@ body{
 </main>
 
 <script>
-const API_URL = "https://console.axino.co/apps/webapi/v1/uplinks/ts/1112543497-1?id=68efa97525ffdf03a2bfe9fb";
+const API_URL = "https://console.axino.co/apps/webapi/v1/uplinks/ts/1112543497-1";
 
-// Chart setup helper
-function makeChart(ctx,label,color){
-  return new Chart(ctx,{
-    type:"line",
-    data:{labels:Array(20).fill(""),datasets:[{label,data:Array(20).fill(0),borderColor:color,backgroundColor:color+"33",tension:0.4,fill:true,pointRadius:0,borderWidth:3}]},
-    options:{scales:{x:{display:false},y:{beginAtZero:false,grid:{color:"#334155"}}},plugins:{legend:{display:false}},animation:false}
+function decodePayload(base64) {
+  try {
+    const jsonStr = atob(base64);
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    console.error("Payload decode failed:", e);
+    return {};
+  }
+}
+
+// chart setup helper
+function makeChart(ctx, color) {
+  return new Chart(ctx, {
+    type: "line",
+    data: { labels: Array(20).fill(""), datasets: [{ data: Array(20).fill(0), borderColor: color, backgroundColor: color+"33", tension: 0.4, fill: true, pointRadius: 0 }] },
+    options: { scales: { x: { display: false }, y: { grid: { color: "#334155" } } }, plugins: { legend: { display: false } }, animation: false }
   });
 }
 
-const tempChart = makeChart(document.getElementById("chart-temp"),"Temp °C","#ef4444");
-const humChart = makeChart(document.getElementById("chart-hum"),"Humidity %","#22d3ee");
-const aqiChart = makeChart(document.getElementById("chart-aqi"),"Air Quality","#10b981");
+const tempChart = makeChart(document.getElementById("chart-temp"), "#ef4444");
+const humChart  = makeChart(document.getElementById("chart-hum"), "#22d3ee");
+const aqiChart  = makeChart(document.getElementById("chart-aqi"), "#10b981");
 
-async function fetchData(){
-  try{
+async function fetchData() {
+  try {
     const res = await fetch(API_URL);
     const json = await res.json();
-    const d = json.data || json;
 
-    // Update values
-    document.getElementById("temperature").innerText = (d.temperature ?? "--")+" °C";
-    document.getElementById("humidity").innerText = (d.humidity ?? "--")+" %";
-    document.getElementById("airQuality").innerText = (d.air_quality ?? "--")+" AQI";
-    document.getElementById("nh3").innerText = (d.nh3 ?? "--")+" ppm";
-    document.getElementById("no2").innerText = (d.no2 ?? "--")+" ppm";
-    document.getElementById("h2s").innerText = (d.h2s ?? "--")+" ppm";
-    document.getElementById("pm25").innerText = (d.pm25 ?? "--")+" µg/m³";
-    document.getElementById("pm10").innerText = (d.pm10 ?? "--")+" µg/m³";
-    document.getElementById("lightIntensity").innerText = (d.light_intensity ?? "--")+" lux";
-    document.getElementById("soundPressure").innerText = (d.sound_pressure ?? "--")+" dB";
-    document.getElementById("soundPeak").innerText = (d.sound_peak ?? "--")+" dB";
-    document.getElementById("soundAverage").innerText = (d.sound_average ?? "--")+" dB";
-    document.getElementById("microphone").innerText = (d.microphone ?? "--");
-    document.getElementById("timestamp").innerText = json.timestamp ? new Date(json.timestamp).toLocaleString() : new Date().toLocaleTimeString();
+    // get last record
+    const latest = json[json.length - 1];
+    const payloadData = decodePayload(latest.payload);
+    const t = payloadData.tm, h = payloadData.rh, aq = payloadData.na;
 
-    // Update charts
-    if(d.temperature!==undefined){tempChart.data.datasets[0].data.push(d.temperature);tempChart.data.datasets[0].data.shift();tempChart.update();}
-    if(d.humidity!==undefined){humChart.data.datasets[0].data.push(d.humidity);humChart.data.datasets[0].data.shift();humChart.update();}
-    if(d.air_quality!==undefined){aqiChart.data.datasets[0].data.push(d.air_quality);aqiChart.data.datasets[0].data.shift();aqiChart.update();}
+    // update KPIs
+    document.getElementById("temperature").innerText = (t ?? "--") + " °C";
+    document.getElementById("humidity").innerText = (h ?? "--") + " %";
+    document.getElementById("airQuality").innerText = (aq ?? "--");
+    document.getElementById("lightIntensity").innerText = (payloadData.li ?? "--") + " lux";
+    document.getElementById("noisePressure").innerText = (payloadData.np ?? "--") + " dB";
+    document.getElementById("nh3").innerText = (payloadData.nh3 ?? "--") + " ppm";
+    document.getElementById("no2").innerText = (payloadData.no2 ?? "--") + " ppm";
+    document.getElementById("h2s").innerText = (payloadData.h2s ?? "--") + " ppm";
+    document.getElementById("voc").innerText = (payloadData.voc ?? "--");
+    document.getElementById("pm25").innerText = (payloadData.pm2 ?? "--") + " µg/m³";
+    document.getElementById("pm10").innerText = (payloadData.pm10 ?? "--") + " µg/m³";
+    document.getElementById("timestamp").innerText = new Date(latest.receivedAt).toLocaleString();
 
-  }catch(e){console.error("Error fetching Axino data:",e);}
+    // update charts
+    if (t !== undefined) { tempChart.data.datasets[0].data.push(t); tempChart.data.datasets[0].data.shift(); tempChart.update(); }
+    if (h !== undefined) { humChart.data.datasets[0].data.push(h); humChart.data.datasets[0].data.shift(); humChart.update(); }
+    if (aq !== undefined) { aqiChart.data.datasets[0].data.push(aq); aqiChart.data.datasets[0].data.shift(); aqiChart.update(); }
+
+  } catch (e) {
+    console.error("Fetch error:", e);
+  }
 }
 
 fetchData();
-setInterval(fetchData,5000);
+setInterval(fetchData, 5000);
 </script>
 </body>
 </html>
