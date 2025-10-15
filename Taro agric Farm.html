@@ -3,48 +3,41 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Taro Agric Farm Dashboard (Live Axino Data)</title>
+<title>Taro Agric Farm Dashboard – Live Axino Data</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-/* Keep your visual design */
 :root {
-  --bg: #0f172a; --panel: #111827; --muted: #6b7280;
-  --accent: #22d3ee; --accent-2: #a78bfa;
-  --good: #22c55e; --bad: #ef4444; --warn: #f59e0b;
+  --bg:#0f172a;--panel:#111827;--muted:#6b7280;
+  --accent:#22d3ee;--accent-2:#a78bfa;
+  --good:#22c55e;--bad:#ef4444;--warn:#f59e0b;
 }
-body {
-  margin: 0;
-  background: radial-gradient(1200px 600px at 80% -10%,rgba(34,211,238,0.12),transparent),
-              radial-gradient(900px 500px at -10% 20%,rgba(167,139,250,0.12),transparent),
-              var(--bg);
-  color: #e5e7eb;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
+body{
+  margin:0;background:radial-gradient(1200px 600px at 80% -10%,rgba(34,211,238,.12),transparent),
+             radial-gradient(900px 500px at -10% 20%,rgba(167,139,250,.12),transparent),var(--bg);
+  color:#e5e7eb;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica Neue,Arial;
 }
-.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-.dash-header { background: rgba(17,24,39,.7); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,.06); position: sticky; top: 0; z-index: 10; }
-.dash-header .container { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .3px; }
-.brand i { color: var(--accent); }
-.dash-main { padding: 28px 0; }
-.dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-.kpi-card, .panel {
-  background: var(--panel); border: 1px solid rgba(255,255,255,.06);
-  border-radius: 14px; padding: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.25);
-}
-.kpi-title { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
-.kpi-value { font-size: 28px; font-weight: 800; margin-top: 6px; }
-.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.panel-header i { color: var(--accent-2); }
-.device-list { list-style: none; padding: 0; margin: 0; }
-.device-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,.08); }
-.badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; }
-.online { background: rgba(34,197,94,.15); color: var(--good); }
-.offline { background: rgba(239,68,68,.15); color: var(--bad); }
-.logs { height: 220px; overflow: auto; background: rgba(0,0,0,.25); border: 1px dashed rgba(255,255,255,.08); border-radius: 10px; padding: 12px; font-family: monospace; }
-.traffic-light { display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:7px;vertical-align:middle;border:2px solid #2226;box-shadow:0 0 2px #0008; }
-.traffic-green { background:#22c55e; } .traffic-yellow { background:#f59e0b; } .traffic-red { background:#ef4444; }
-.span-2 { grid-column: span 2; }
+.container{max-width:1200px;margin:0 auto;padding:0 20px;}
+.dash-header{background:rgba(17,24,39,.7);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:10;}
+.dash-header .container{display:flex;align-items:center;justify-content:space-between;padding:12px 0;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;}
+.brand i{color:var(--accent);}
+.dash-main{padding:28px 0;}
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.kpi-card,.panel{background:var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.25);}
+.kpi-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;}
+.kpi-value{font-size:28px;font-weight:800;margin-top:6px;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.panel-header i{color:var(--accent-2);}
+.device-list{list-style:none;padding:0;margin:0;}
+.device-list li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.08);}
+.badge{padding:4px 8px;border-radius:999px;font-size:12px;}
+.online{background:rgba(34,197,94,.15);color:var(--good);}
+.offline{background:rgba(239,68,68,.15);color:var(--bad);}
+.logs{height:220px;overflow:auto;background:rgba(0,0,0,.25);border:1px dashed rgba(255,255,255,.08);border-radius:10px;padding:12px;font-family:monospace;}
+.span-2{grid-column:span 2;}
+@media(max-width:1024px){.dash-grid{grid-template-columns:repeat(2,1fr);} .span-2{grid-column:span 2;}}
+@media(max-width:600px){.dash-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -58,6 +51,7 @@ body {
 <div class="container">
 <section class="dash-grid">
 
+  <!-- Charts -->
   <div class="kpi-card span-2">
     <div class="kpi-title">Temperature</div>
     <div class="kpi-value" id="temperature">-- °C</div>
@@ -70,15 +64,19 @@ body {
     <canvas id="chart-hum" height="100"></canvas>
   </div>
 
-  <div class="kpi-card"><div class="kpi-title">Air Quality</div><div class="kpi-value" id="airQuality">-- AQI</div></div>
-  <div class="kpi-card"><div class="kpi-title">Light</div><div class="kpi-value" id="lightIntensity">-- lux</div></div>
+  <div class="kpi-card span-2">
+    <div class="kpi-title">Air Quality (AQI)</div>
+    <div class="kpi-value" id="airQuality">-- AQI</div>
+    <canvas id="chart-aqi" height="100"></canvas>
+  </div>
 
+  <!-- Sensors -->
   <div class="panel span-2">
     <div class="panel-header"><i class="fas fa-wind"></i><span>Gas Sensors</span></div>
     <ul class="device-list">
-      <li><span>NH3</span><span class="badge" id="nh3">-- ppm</span></li>
-      <li><span>NO2</span><span class="badge" id="no2">-- ppm</span></li>
-      <li><span>H2S</span><span class="badge" id="h2s">-- ppm</span></li>
+      <li><span>NH₃</span><span class="badge" id="nh3">-- ppm</span></li>
+      <li><span>NO₂</span><span class="badge" id="no2">-- ppm</span></li>
+      <li><span>H₂S</span><span class="badge" id="h2s">-- ppm</span></li>
     </ul>
   </div>
 
@@ -91,6 +89,13 @@ body {
   </div>
 
   <div class="panel">
+    <div class="panel-header"><i class="fas fa-sun"></i><span>Light Intensity</span></div>
+    <ul class="device-list">
+      <li><span>Illuminance</span><span class="badge" id="lightIntensity">-- lux</span></li>
+    </ul>
+  </div>
+
+  <div class="panel">
     <div class="panel-header"><i class="fas fa-volume-up"></i><span>Noise Levels</span></div>
     <ul class="device-list">
       <li><span>Sound Pressure</span><span class="badge" id="soundPressure">-- dB</span></li>
@@ -99,7 +104,7 @@ body {
     </ul>
   </div>
 
-  <div class="panel">
+  <div class="panel span-2">
     <div class="panel-header"><i class="fas fa-microphone"></i><span>Microphone</span></div>
     <ul class="device-list">
       <li><span>Audio Level</span><span class="badge" id="microphone">--</span></li>
@@ -118,68 +123,51 @@ body {
 <script>
 const API_URL = "https://console.axino.co/apps/webapi/v1/uplinks/ts/1112543497-1?id=68efa97525ffdf03a2bfe9fb";
 
-// Chart.js setup
-const tempCtx = document.getElementById("chart-temp");
-const humCtx = document.getElementById("chart-hum");
+// Chart setup helper
+function makeChart(ctx,label,color){
+  return new Chart(ctx,{
+    type:"line",
+    data:{labels:Array(20).fill(""),datasets:[{label,data:Array(20).fill(0),borderColor:color,backgroundColor:color+"33",tension:0.4,fill:true,pointRadius:0,borderWidth:3}]},
+    options:{scales:{x:{display:false},y:{beginAtZero:false,grid:{color:"#334155"}}},plugins:{legend:{display:false}},animation:false}
+  });
+}
 
-const tempChart = new Chart(tempCtx, {
-  type: "line",
-  data: { labels: Array(20).fill(""), datasets: [{ label: "Temp (°C)", data: Array(20).fill(0), borderColor: "#ef4444", backgroundColor: "#ef444433", tension: 0.4, fill: true, pointRadius: 0 }] },
-  options: { scales: { x: { display: false }, y: { beginAtZero: false, grid: { color: "#334155" } } }, plugins: { legend: { display: false } }, animation: false }
-});
+const tempChart = makeChart(document.getElementById("chart-temp"),"Temp °C","#ef4444");
+const humChart = makeChart(document.getElementById("chart-hum"),"Humidity %","#22d3ee");
+const aqiChart = makeChart(document.getElementById("chart-aqi"),"Air Quality","#10b981");
 
-const humChart = new Chart(humCtx, {
-  type: "line",
-  data: { labels: Array(20).fill(""), datasets: [{ label: "Humidity (%)", data: Array(20).fill(0), borderColor: "#22d3ee", backgroundColor: "#22d3ee33", tension: 0.4, fill: true, pointRadius: 0 }] },
-  options: { scales: { x: { display: false }, y: { beginAtZero: false, grid: { color: "#334155" } } }, plugins: { legend: { display: false } }, animation: false }
-});
-
-async function fetchData() {
-  try {
+async function fetchData(){
+  try{
     const res = await fetch(API_URL);
     const json = await res.json();
     const d = json.data || json;
 
-    // Update textual data
-    document.getElementById("temperature").innerText = (d.temperature ?? "--") + " °C";
-    document.getElementById("humidity").innerText = (d.humidity ?? "--") + " %";
-    document.getElementById("airQuality").innerText = (d.air_quality ?? "--") + " AQI";
-    document.getElementById("nh3").innerText = (d.nh3 ?? "--") + " ppm";
-    document.getElementById("no2").innerText = (d.no2 ?? "--") + " ppm";
-    document.getElementById("h2s").innerText = (d.h2s ?? "--") + " ppm";
-    document.getElementById("pm25").innerText = (d.pm25 ?? "--") + " µg/m³";
-    document.getElementById("pm10").innerText = (d.pm10 ?? "--") + " µg/m³";
-    document.getElementById("lightIntensity").innerText = (d.light_intensity ?? "--") + " lux";
-    document.getElementById("soundPressure").innerText = (d.sound_pressure ?? "--") + " dB";
-    document.getElementById("soundPeak").innerText = (d.sound_peak ?? "--") + " dB";
-    document.getElementById("soundAverage").innerText = (d.sound_average ?? "--") + " dB";
+    // Update values
+    document.getElementById("temperature").innerText = (d.temperature ?? "--")+" °C";
+    document.getElementById("humidity").innerText = (d.humidity ?? "--")+" %";
+    document.getElementById("airQuality").innerText = (d.air_quality ?? "--")+" AQI";
+    document.getElementById("nh3").innerText = (d.nh3 ?? "--")+" ppm";
+    document.getElementById("no2").innerText = (d.no2 ?? "--")+" ppm";
+    document.getElementById("h2s").innerText = (d.h2s ?? "--")+" ppm";
+    document.getElementById("pm25").innerText = (d.pm25 ?? "--")+" µg/m³";
+    document.getElementById("pm10").innerText = (d.pm10 ?? "--")+" µg/m³";
+    document.getElementById("lightIntensity").innerText = (d.light_intensity ?? "--")+" lux";
+    document.getElementById("soundPressure").innerText = (d.sound_pressure ?? "--")+" dB";
+    document.getElementById("soundPeak").innerText = (d.sound_peak ?? "--")+" dB";
+    document.getElementById("soundAverage").innerText = (d.sound_average ?? "--")+" dB";
     document.getElementById("microphone").innerText = (d.microphone ?? "--");
-    document.getElementById("timestamp").innerText = json.timestamp
-      ? new Date(json.timestamp).toLocaleString()
-      : new Date().toLocaleTimeString();
+    document.getElementById("timestamp").innerText = json.timestamp ? new Date(json.timestamp).toLocaleString() : new Date().toLocaleTimeString();
 
-    // Update live charts
-    if (d.temperature !== undefined) {
-      tempChart.data.datasets[0].data.push(d.temperature);
-      tempChart.data.datasets[0].data.shift();
-      tempChart.update();
-    }
-    if (d.humidity !== undefined) {
-      humChart.data.datasets[0].data.push(d.humidity);
-      humChart.data.datasets[0].data.shift();
-      humChart.update();
-    }
+    // Update charts
+    if(d.temperature!==undefined){tempChart.data.datasets[0].data.push(d.temperature);tempChart.data.datasets[0].data.shift();tempChart.update();}
+    if(d.humidity!==undefined){humChart.data.datasets[0].data.push(d.humidity);humChart.data.datasets[0].data.shift();humChart.update();}
+    if(d.air_quality!==undefined){aqiChart.data.datasets[0].data.push(d.air_quality);aqiChart.data.datasets[0].data.shift();aqiChart.update();}
 
-  } catch (e) {
-    console.error("Error fetching Axino data:", e);
-  }
+  }catch(e){console.error("Error fetching Axino data:",e);}
 }
 
-// Run every 5 s
 fetchData();
-setInterval(fetchData, 5000);
+setInterval(fetchData,5000);
 </script>
 </body>
 </html>
-
-
