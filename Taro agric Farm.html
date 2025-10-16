@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -84,7 +84,7 @@
         <div class="container">
             <div class="brand">
                 <i class="fas fa-signal"></i>
-                <span>Agric Farm/AAKTP Dashboard</span>
+                <span>Taro Agric Farm/AAKTP Dashboard</span>
             </div>
             <nav class="dash-nav">
                 <a href="index.html">Home</a>
@@ -105,11 +105,6 @@
                     <div class="kpi-title">Humidity</div>
                     <div class="kpi-value" id="kpi-hum">-- %</div>
                     <div class="kpi-trend" id="kpi-hum-trend">Loading...</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-title">Pressure</div>
-                    <div class="kpi-value" id="kpi-pres">-- hPa</div>
-                    <div class="kpi-trend" id="kpi-pres-trend">Loading...</div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-title">Air Quality</div>
@@ -137,15 +132,12 @@
                 <div class="panel span-2">
                     <div class="panel-header">
                         <i class="fas fa-wind"></i>
-                        <span>VOC Sensor (Volatile Organic Compounds)</span>
+                        <span>TVOC Sensor (Total Volatile Organic Compounds)</span>
                     </div>
                     <div class="device-list">
-                        <li><span>CO (Carbon Monoxide)</span><span class="badge" id="voc-co">0.0 PPM</span></li>
-                        <li><span>CH4 (Methane)</span><span class="badge" id="voc-ch4">0.0 PPM</span></li>
-                        <li><span>C2H5OH (Ethanol)</span><span class="badge" id="voc-ethanol">0.0 PPM</span></li>
-                        <li><span>H2 (Hydrogen)</span><span class="badge" id="voc-h2">0.0 PPM</span></li>
                         <li><span>NH3 (Ammonia)</span><span class="badge" id="voc-nh3">0.0 PPM</span></li>
                         <li><span>NO2 (Nitrogen Dioxide)</span><span class="badge" id="voc-no2">0.0 PPM</span></li>
+                        <li><span>H2S (Hydrogen Sulfide)</span><span class="badge" id="voc-h2s">0.0 PPM</span></li>
                     </div>
                 </div>
                 <div class="panel span-2">
@@ -175,6 +167,8 @@
                     </div>
                     <div class="device-list">
                         <li><span>Sound Pressure</span><span class="badge" id="noise-db">0 dB</span></li>
+                        <li><span>Peak</span><span class="badge" id="noise-peak">0 dB</span></li>
+                        <li><span>Average</span><span class="badge" id="noise-avg">0 dB</span></li>
                     </div>
                 </div>
                 <div class="panel span-2">
@@ -190,29 +184,6 @@
                     <div class="logs" id="mic-log">
                         <div class="row"><span class="ts">[00:00:01]</span> <span class="msg">Microphone activated</span></div>
                         <div class="row"><span class="ts">[00:00:02]</span> <span class="msg">Recording audio...</span></div>
-                    </div>
-                </div>
-                <div class="panel span-2">
-                    <div class="panel-header">
-                        <i class="fas fa-water"></i>
-                        <span>Water Quality (H2O)</span>
-                    </div>
-                    <div class="device-list">
-                        <li><span>pH</span><span class="badge" id="water-ph">6.14</span></li>
-                        <li><span>Turbidity</span><span class="badge" id="water-turbidity">8.7 NTU</span></li>
-                        <li><span>TDS / EC</span><span class="badge" id="water-tds">186 ppm / 373 µS/cm</span></li>
-                    </div>
-                </div>
-                <div class="panel span-2">
-                    <div class="panel-header">
-                        <i class="fas fa-weight-hanging"></i>
-                        <span>Weight Sensor (HX711)</span>
-                    </div>
-                    <div class="device-list">
-                        <li><span>Gross</span><span class="badge" id="hx-gross">4.52 kg</span></li>
-                        <li><span>Net</span><span class="badge" id="hx-net">4.52 kg</span></li>
-                        <li><span>Raw</span><span class="badge" id="hx-raw">45243</span></li>
-                        <li><span>Factor</span><span class="badge" id="hx-factor">1.000</span></li>
                     </div>
                 </div>
                 <div class="panel">
@@ -233,6 +204,8 @@
                         <span>Event Logs</span>
                         <div class="panel-actions">
                             <button class="btn-sm" id="clear-logs">Clear</button>
+                            <button class="btn-sm" id="download-csv">Download CSV</button>
+                            <button class="btn-sm" id="download-sensors-csv">Download Sensors CSV</button>
                         </div>
                     </div>
                     <div class="logs" id="logs" style="height:320px;">
@@ -339,6 +312,10 @@ document.addEventListener("DOMContentLoaded", () => {
 const tempChart = createChart(document.getElementById("chart-temp"), "Temp °C", colors.temp);
 const humidityChart = createChart(document.getElementById("chart-hum"), "Humidity %", colors.humidity);
 
+// --- Noise stats tracking ---
+let noiseHistory = [];
+const NOISE_HISTORY_MAX = 100;
+
 // --- Dashboard update function (call this with real sensor data) ---
 function updateDashboardWithSensors(sensors) {
     // Update KPI cards with traffic lights
@@ -346,29 +323,20 @@ function updateDashboardWithSensors(sensors) {
         `<span class="traffic-light ${getTrafficLight('temp', sensors.temp)}"></span>${sensors.temp.toFixed(2)} °C`;
     document.getElementById("kpi-hum").innerHTML =
         `<span class="traffic-light ${getTrafficLight('humidity', sensors.humidity)}"></span>${sensors.humidity.toFixed(1)} %`;
-    document.getElementById("kpi-pres").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('pressure', sensors.pressure)}"></span>${sensors.pressure.toFixed(1)} hPa`;
     document.getElementById("kpi-aqi").innerHTML =
         `<span class="traffic-light ${getTrafficLight('airQuality', sensors.airQuality)}"></span>${sensors.airQuality.toFixed(1)} AQI`;
 
     document.getElementById("kpi-temp-trend").textContent = sensors.temp > 28 ? "Rising" : "Stable";
     document.getElementById("kpi-hum-trend").textContent = sensors.humidity < 40 ? "Dropping" : "Normal";
-    document.getElementById("kpi-pres-trend").textContent = sensors.pressure > 1015 ? "High" : "Normal";
     document.getElementById("kpi-aqi-trend").textContent = sensors.airQuality > 100 ? "Poor" : "Good";
 
-    // VOC
-    document.getElementById("voc-co").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('voc', sensors.voc_co)}"></span>${sensors.voc_co.toFixed(1)} PPM`;
-    document.getElementById("voc-ch4").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('voc', sensors.voc_ch4)}"></span>${sensors.voc_ch4.toFixed(1)} PPM`;
-    document.getElementById("voc-ethanol").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('voc', sensors.voc_ethanol)}"></span>${sensors.voc_ethanol.toFixed(1)} PPM`;
-    document.getElementById("voc-h2").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('voc', sensors.voc_h2)}"></span>${sensors.voc_h2.toFixed(1)} PPM`;
+    // TVOC (was VOC)
     document.getElementById("voc-nh3").innerHTML =
         `<span class="traffic-light ${getTrafficLight('voc', sensors.voc_nh3)}"></span>${sensors.voc_nh3.toFixed(1)} PPM`;
     document.getElementById("voc-no2").innerHTML =
         `<span class="traffic-light ${getTrafficLight('voc', sensors.voc_no2)}"></span>${sensors.voc_no2.toFixed(2)} PPM`;
+    document.getElementById("voc-h2s").innerHTML =
+        `<span class="traffic-light ${getTrafficLight('voc', sensors.voc_h2s)}"></span>${sensors.voc_h2s.toFixed(2)} PPM`;
 
     // PM
     document.getElementById("pm-1").innerHTML =
@@ -384,21 +352,13 @@ function updateDashboardWithSensors(sensors) {
     document.getElementById("noise-db").innerHTML =
         `<span class="traffic-light ${getTrafficLight('noise', sensors.noise)}"></span>${Math.round(sensors.noise)} dB`;
 
-    // Water Quality
-    document.getElementById("water-ph").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('ph', sensors.ph)}"></span>${sensors.ph.toFixed(2)}`;
-    document.getElementById("water-turbidity").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('turbidity', sensors.turbidity)}"></span>${sensors.turbidity.toFixed(1)} NTU`;
-    document.getElementById("water-tds").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('tds', sensors.tds)}"></span>${Math.round(sensors.tds)} ppm / ${Math.round(sensors.tds * 2)} µS/cm`;
-
-    // Weight Sensor
-    document.getElementById("hx-gross").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('hxNet', sensors.hxGross)}"></span>${sensors.hxGross.toFixed(2)} kg`;
-    document.getElementById("hx-net").innerHTML =
-        `<span class="traffic-light ${getTrafficLight('hxNet', sensors.hxNet)}"></span>${sensors.hxNet.toFixed(2)} kg`;
-    document.getElementById("hx-raw").textContent = sensors.hxRaw;
-    document.getElementById("hx-factor").textContent = sensors.hxFactor.toFixed(3);
+    // --- Noise Peak & Average ---
+    noiseHistory.push(sensors.noise);
+    if (noiseHistory.length > NOISE_HISTORY_MAX) noiseHistory.shift();
+    const noisePeak = Math.max(...noiseHistory);
+    const noiseAvg = noiseHistory.reduce((a, b) => a + b, 0) / noiseHistory.length;
+    document.getElementById("noise-peak").innerHTML = `${Math.round(noisePeak)} dB`;
+    document.getElementById("noise-avg").innerHTML = `${Math.round(noiseAvg)} dB`;
 
     // Update charts
     tempChart.data.datasets[0].data.push(sensors.temp);
@@ -409,16 +369,13 @@ function updateDashboardWithSensors(sensors) {
     humidityChart.update();
 
     // Example: Add logs for certain thresholds (customize as needed)
-    if (sensors.ph < 6.0 || sensors.ph > 9.0) addLog(`Water pH out of range: ${sensors.ph.toFixed(2)}`, "warn");
     if (sensors.pm25 > 55) addLog(`PM 2.5 elevated: ${sensors.pm25.toFixed(0)} µg/m³`, "warn");
-    if (sensors.hxNet > 4.5) addLog(`Near capacity: ${sensors.hxNet.toFixed(2)} kg`, "warn");
     if (sensors.voc_nh3 > 120) addLog(`Elevated NH3: ${sensors.voc_nh3.toFixed(1)} PPM`, "warn");
-    if (sensors.tds > 600) addLog(`High TDS: ${Math.round(sensors.tds)} ppm`, "err");
     if (sensors.airQuality > 120) addLog(`Air quality degraded: AQI ${sensors.airQuality.toFixed(2)}`, "err");
     if (sensors.temp > 32) addLog(`High temperature detected: ${sensors.temp.toFixed(2)} °C`, "warn");
     if (sensors.noise > 85) addLog(`High noise level: ${Math.round(sensors.noise)} dB`, "err");
     if (sensors.turbidity > 5) addLog(`High turbidity: ${sensors.turbidity.toFixed(1)} NTU`, "warn");
-    if (sensors.voc_co > 150) addLog(`High CO detected: ${sensors.voc_co.toFixed(1)} PPM`, "err");
+    if (sensors.voc_no2 > 150) addLog(`High NO2 detected: ${sensors.voc_no2.toFixed(1)} PPM`, "err");
     if (sensors.pm10 > 150) addLog(`PM 10 high: ${sensors.pm10.toFixed(0)} µg/m³`, "err");
 }
 
@@ -432,51 +389,29 @@ function randomWalk(prev, min, max, step = 1, jitter = 0.2) {
 let simSensors = {
     temp: 27.5,
     humidity: 55,
-    pressure: 1012,
     airQuality: 80,
-    voc_co: 72,
-    voc_ch4: 60,
-    voc_ethanol: 36,
-    voc_h2: 24,
     voc_nh3: 48,
     voc_no2: 3,
+    voc_h2s: 0.5,
     light: 400,
     noise: 45,
     pm1: 8,
     pm25: 18,
-    pm10: 22,
-    ph: 7.1,
-    turbidity: 2.5,
-    tds: 250,
-    hxGross: 2.5,
-    hxNet: 2.5,
-    hxRaw: 25000,
-    hxFactor: 1.000
+    pm10: 22
 };
 setInterval(() => {
     // Simulate values
     simSensors.temp = 27.5 + (Math.random() - 0.5) * 0.2;
     simSensors.humidity = randomWalk(simSensors.humidity, 40, 90, 1.2, 0.5);
-    simSensors.pressure = randomWalk(simSensors.pressure, 950, 1050, 0.8, 0.3);
     simSensors.airQuality = randomWalk(simSensors.airQuality, 40, 200, 2, 1);
-    simSensors.voc_co = randomWalk(simSensors.voc_co, 0, 400, 5, 2);
-    simSensors.voc_ch4 = randomWalk(simSensors.voc_ch4, 0, 400, 5, 2);
-    simSensors.voc_ethanol = randomWalk(simSensors.voc_ethanol, 0, 400, 5, 2);
-    simSensors.voc_h2 = randomWalk(simSensors.voc_h2, 0, 400, 5, 2);
     simSensors.voc_nh3 = randomWalk(simSensors.voc_nh3, 0, 400, 5, 2);
     simSensors.voc_no2 = randomWalk(simSensors.voc_no2, 0, 5, 0.1, 0.05);
+    simSensors.voc_h2s = randomWalk(simSensors.voc_h2s, 0, 10, 0.2, 0.05);
     simSensors.light = randomWalk(simSensors.light, 0, 100000, 3000, 100);
     simSensors.noise = randomWalk(simSensors.noise, 30, 97, 2, 1);
     simSensors.pm1 = randomWalk(simSensors.pm1, 0, 30, 1, 0.5);
     simSensors.pm25 = randomWalk(simSensors.pm25, 0, 120, 2, 1);
     simSensors.pm10 = randomWalk(simSensors.pm10, 0, 200, 3, 1.5);
-    simSensors.ph = randomWalk(simSensors.ph, 5.5, 9.5, 0.05, 0.02);
-    simSensors.turbidity = randomWalk(simSensors.turbidity, 0, 10, 0.2, 0.1);
-    simSensors.tds = randomWalk(simSensors.tds, 50, 1200, 10, 2);
-    simSensors.hxGross = randomWalk(simSensors.hxGross, 0, 5, 0.1, 0.05);
-    simSensors.hxNet = simSensors.hxGross;
-    simSensors.hxRaw = Math.round(simSensors.hxGross * 10000 + Math.random() * 100);
-    simSensors.hxFactor = 1.000;
     updateDashboardWithSensors(simSensors);
 }, 1800);
 
@@ -493,6 +428,53 @@ const toggleTheme = document.getElementById('toggle-theme');
 toggleTheme.addEventListener('click', () => {
     document.documentElement.classList.toggle('light');
 });
+
+// --- CSV Download for Event Logs ---
+document.getElementById('download-csv').onclick = function() {
+    const logs = document.querySelectorAll('#logs .row');
+    let csv = "Time,Message\n";
+    logs.forEach(row => {
+        const ts = row.querySelector('.ts')?.textContent.replace(/[\[\]]/g, '') || "";
+        const msg = row.textContent.replace(ts, '').replace('•', '').trim();
+        csv += `"${ts}","${msg}"\n`;
+    });
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'event_logs.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+};
+
+// --- CSV Download for Sensor Data (latest values) ---
+document.getElementById('download-sensors-csv').onclick = function() {
+    // Use the latest simulated sensor values
+    const sensors = simSensors;
+    let csv = "Sensor,Value\n";
+    csv += `Temperature,${sensors.temp}\n`;
+    csv += `Humidity,${sensors.humidity}\n`;
+    csv += `Air Quality,${sensors.airQuality}\n`;
+    csv += `NH3,${sensors.voc_nh3}\n`;
+    csv += `NO2,${sensors.voc_no2}\n`;
+    csv += `H2S,${sensors.voc_h2s}\n`;
+    csv += `Light,${sensors.light}\n`;
+    csv += `Noise,${sensors.noise}\n`;
+    csv += `PM1,${sensors.pm1}\n`;
+    csv += `PM2.5,${sensors.pm25}\n`;
+    csv += `PM10,${sensors.pm10}\n`;
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sensor_data.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+};
 </script>
 </body>
 </html>
