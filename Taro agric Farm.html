@@ -40,11 +40,12 @@
     th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.04);text-align:left}
     thead th{color:#94a3b8}
     @media(max-width:1024px){.dash-grid{grid-template-columns:repeat(2,1fr)}.span-2{grid-column:span 2}.prod-kpi-row{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.dash-grid{grid-template-columns:1fr}.prod-kpi-row{grid-template-columns:1fr}}
-    .traffic-light{width:12px;height:12px;border-radius:50%;display:inline-block;margin-left:6px;vertical-align:middle}
-.status-good .traffic-light{background:#22c55e;box-shadow:0 0 6px #22c55e}
-.status-warn .traffic-light{background:#f59e0b;box-shadow:0 0 6px #f59e0b}
-.status-bad .traffic-light{background:#ef4444;box-shadow:0 0 6px #ef4444}
-</style>
+    
+    .traffic-light { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:8px; vertical-align:middle; box-shadow:0 0 6px rgba(0,0,0,0.4); border:2px solid rgba(0,0,0,0.25); }
+    .traffic-green{ background:#22c55e; box-shadow:0 0 8px #22c55e33; }
+    .traffic-yellow{ background:#f59e0b; box-shadow:0 0 8px #f59e0b33; }
+    .traffic-red{ background:#ef4444; box-shadow:0 0 8px #ef444433; }
+    </style>
 </head>
 <body>
 <header class="dash-header"><div class="container"><div class="brand"><i class="fas fa-signal"></i><span>Taro Agric Farm/AAKTP Dashboard</span></div><nav class="dash-nav"><a id="nav-home" class="active">Home</a><a id="nav-production">Production Data</a><a id="toggle-theme">Theme</a></nav></div></header>
@@ -52,19 +53,31 @@
 <main class="dash-main"><div class="container">
 <section id="home" class="page">
   <div class="dash-grid" id="home-grid">
-    <div class="kpi-card" id="card-temp"><div class="kpi-title">Temperature <span class="traffic-light" id="tl-temp"></span></div><div class="kpi-value" id="kpi-temp">-- °C</div><div class="kpi-trend" id="kpi-temp-trend">Loading...</div></div>
-    <div class="kpi-card" id="card-hum"><div class="kpi-title">Humidity <span class="traffic-light" id="tl-hum"></span></div><div class="kpi-value" id="kpi-hum">-- %</div><div class="kpi-trend" id="kpi-hum-trend">Loading...</div></div>
-    <div class="kpi-card" id="card-aqi"><div class="kpi-title">Air Quality <span class="traffic-light" id="tl-aqi"></span></div><div class="kpi-value" id="kpi-aqi">-- AQI</div><div class="kpi-trend" id="kpi-aqi-trend">Loading...</div></div>
-    <div class="kpi-card" id="thpi-card" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px"><div style="flex:1"><div class="kpi-title">THPI <span class="traffic-light" id="tl-thpi"></span></div><div class="kpi-value" id="kpi-thpi">--</div><div class="kpi-trend" id="kpi-thpi-trend">Overall index</div></div><div style="width:140px;height:120px;"><canvas id="thpiGauge" width="140" height="120"></canvas></div></div>
+    <div class="kpi-card" id="card-temp"><div class="kpi-title"><span class="traffic-light" id="tl-temp"></span>Temperature</div><div class="kpi-value" id="kpi-temp">-- °C</div><div class="kpi-trend" id="kpi-temp-trend">Loading...</div></div>
+    <div class="kpi-card" id="card-hum"><div class="kpi-title"><span class="traffic-light" id="tl-hum"></span>Humidity</div><div class="kpi-value" id="kpi-hum">-- %</div><div class="kpi-trend" id="kpi-hum-trend">Loading...</div></div>
+    <div class="kpi-card" id="card-aqi"><div class="kpi-title"><span class="traffic-light" id="tl-aqi"></span>Air Quality</div><div class="kpi-value" id="kpi-aqi">-- AQI</div><div class="kpi-trend" id="kpi-aqi-trend">Loading...</div></div>
+    <div class="kpi-card" id="thpi-card" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px"><div style="flex:1"><div class="kpi-title"><span class="traffic-light" id="tl-thpi"></span>THPI</div><div class="kpi-value" id="kpi-thpi">--</div><div class="kpi-trend" id="kpi-thpi-trend">Overall index</div></div><div style="width:140px;height:120px;"><canvas id="thpiGauge" width="140" height="120"></canvas></div>
+            <div class="kpi-card" id="thi-card" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px">
+              <div style="flex:1">
+                <div class="kpi-title">THI <span class="traffic-light" id="tl-thi"></span></div>
+                <div class="kpi-value" id="kpi-thi">--</div>
+                <div class="kpi-trend" id="kpi-thi-trend">Overall index</div>
+              </div>
+              <div style="width:140px;height:120px;">
+                <canvas id="thiGauge" width="140" height="120"></canvas>
+              </div>
+            </div>
+
+</div>
 
     <div class="panel"><div class="panel-header"><i class="fas fa-thermometer-half"></i><span>Temperature Stream</span></div><canvas id="chart-temp" height="120"></canvas></div>
     <div class="panel"><div class="panel-header"><i class="fas fa-tint"></i><span>Humidity Stream</span></div><canvas id="chart-hum" height="120"></canvas></div>
 
-    <div class="panel span-2"><div class="panel-header"><i class="fas fa-wind"></i><span>TVOC Sensor (NH3 / NO2 / H2S)</span><span class="traffic-light" id="tl-tvoc"></span></div><div class="device-list"><li><span>NH3 (Ammonia)</span><span class="badge" id="voc-nh3">0.0 PPM</span></li><li><span>NO2 (Nitrogen Dioxide)</span><span class="badge" id="voc-no2">0.0 PPM</span></li><li><span>H2S (Hydrogen Sulfide)</span><span class="badge" id="voc-h2s">0.0 PPM</span></li></div></div>
+    <div class="panel span-2"><div class="panel-header"><i class="fas fa-wind"></i><span><span class="traffic-light" id="tl-tvoc"></span>TVOC Sensor (NH3 / NO2 / H2S)</span></div><div class="device-list"><li><span>NH3 (Ammonia)</span><span class="badge" id="voc-nh3">0.0 PPM</span></li><li><span>NO2 (Nitrogen Dioxide)</span><span class="badge" id="voc-no2">0.0 PPM</span></li><li><span>H2S (Hydrogen Sulfide)</span><span class="badge" id="voc-h2s">0.0 PPM</span></li></div></div>
 
-    <div class="panel span-2"><div class="panel-header"><i class="fas fa-smog"></i><span>Particulate Matter</span><span class="traffic-light" id="tl-pm"></span></div><div class="device-list"><li><span>PM 2.5</span><span class="badge" id="pm-25">0 µg/m³</span></li><li><span>PM 10</span><span class="badge" id="pm-10">0 µg/m³</span></li></div></div>
+    <div class="panel span-2"><div class="panel-header"><i class="fas fa-smog"></i><span><span class="traffic-light" id="tl-pm"></span>Particulate Matter</span></div><div class="device-list"><li><span>PM 2.5</span><span class="badge" id="pm-25">0 µg/m³</span></li><li><span>PM 10</span><span class="badge" id="pm-10">0 µg/m³</span></li></div></div>
 
-    <div class="panel"><div class="panel-header"><i class="fas fa-sun"></i><span>Light Intensity</span><span class="traffic-light" id="tl-light"></span></div><div class="device-list"><li><span>Illuminance</span><span class="badge" id="light-lux">0 lux</span></li></div></div>
+    <div class="panel"><div class="panel-header"><i class="fas fa-sun"></i><span><span class="traffic-light" id="tl-light"></span>Light Intensity</span></div><div class="device-list"><li><span>Illuminance</span><span class="badge" id="light-lux">0 lux</span></li></div></div>
 
     <div class="panel"><div class="panel-header"><i class="fas fa-volume-up"></i><span>Noise Levels</span></div><div class="device-list"><li><span>Sound Pressure</span><span class="badge" id="noise-db">0 dB</span></li><li><span>Peak</span><span class="badge" id="noise-peak">0 dB</span></li><li><span>Average</span><span class="badge" id="noise-avg">0 dB</span></li></div></div>
 
@@ -120,6 +133,59 @@ const thpiGauge = new Chart(thpiCtx, {
     }
   }]
 });
+
+    // --- THI (Temperature-Humidity Index) ---
+    function computeTHIFromSensors(s){
+      const T = Number(s.temp);
+      const RH = Number(s.humidity);
+      const thi = T - (0.55 - 0.0055 * RH) * (T - 14.5);
+      return +thi.toFixed(1);
+    }
+
+    // create THI gauge (same style as THPI)
+    (function(){
+      const thiCanvas = document.getElementById('thiGauge');
+      if(!thiCanvas) return;
+      const thiCtx = thiCanvas.getContext('2d');
+      window.thiGauge = new Chart(thiCtx, {
+        type: 'doughnut',
+        data: {
+          labels:['Good','Moderate','Poor'],
+          datasets:[{ data:[40,20,40], backgroundColor:['#22c55e','#f59e0b','#ef4444'], borderWidth:0, hoverOffset:0 }]
+        },
+        options: {
+          circumference: Math.PI,
+          rotation: Math.PI,
+          cutout: '70%',
+          responsive: false,
+          plugins:{ legend:{ display:false }, tooltip:{ enabled:false } }
+        },
+        plugins: [{
+          id: 'thiPointer',
+          afterDraw: function(chart){
+            const value = chart.$value ?? 0;
+            const ctx = chart.ctx;
+            const meta = chart.getDatasetMeta(0).data[0];
+            const cx = meta.x, cy = meta.y, r = meta.outerRadius;
+            const angle = Math.PI - (value/100)*Math.PI;
+            ctx.save(); ctx.translate(cx,cy); ctx.rotate(angle);
+            ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(r*0.6,0); ctx.lineTo(0,6); ctx.fillStyle='#111827'; ctx.fill();
+            ctx.beginPath(); ctx.arc(r*0.62,0,4,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill();
+            ctx.restore();
+            ctx.fillStyle = '#e5e7eb'; ctx.font='700 18px Inter, Arial'; ctx.textAlign='center'; ctx.fillText(String(Math.round(value)), cx, cy+20);
+          }
+        }]
+      });
+    })();
+
+    function setTHI(v){
+      if(window.thiGauge){ window.thiGauge.$value = Math.max(0, Math.min(100, v)); window.thiGauge.draw(); }
+      setText('kpi-thi', Math.round(v));
+      const status = v < 68 ? 'Good' : v < 75 ? 'Moderate' : 'Poor';
+      setText('kpi-thi-trend', status);
+    }
+
+    let lastThiCategory = null;
 function setTHPI(v){ thpiGauge.$value = Math.max(0,Math.min(100,v)); thpiGauge.draw(); setText('kpi-thpi', Math.round(v)); const status = v>=80? 'Good' : v>=60? 'Moderate' : 'Poor'; setText('kpi-thpi-trend', status); }
 
 // simulation
@@ -128,6 +194,8 @@ function randomWalk(prev,min,max,step=1,jitter=0.2){ let next = prev + (Math.ran
 function computeTHPI(s){ const t=s.temp; let tScore=0; if(t<=20) tScore=60-(20-t)*2; else if(t<=28) tScore=100; else tScore=Math.max(0,100-(t-28)*6); const h=s.humidity; let hScore=0; if(h>=40&&h<=70) hScore=100; else if(h<40) hScore=Math.max(0,100-(40-h)*2); else hScore=Math.max(0,100-(h-70)*2); const a=s.airQuality; let aScore=Math.max(0,Math.min(100,100-(a/200)*100)); const p25=s.pm25; const pScore=Math.max(0,Math.min(100,100-(p25/120)*100)); return (tScore*0.25 + hScore*0.2 + aScore*0.35 + pScore*0.2); }
 
 function getStatusFor(sensor,value){
+  if(sensor==='thi'){ if(value<68) return 'good'; if(value<75) return 'warn'; return 'bad'; }
+
   if(sensor==='temp'){ if(value>=20&&value<=30) return 'good'; if((value>30&&value<=35)||(value<20&&value>=15)) return 'warn'; return 'bad'; }
   if(sensor==='humidity'){ if(value>=40&&value<=75) return 'good'; if((value>=30&&value<40)||(value>75&&value<=85)) return 'warn'; return 'bad'; }
   if(sensor==='aqi'){ if(value<=50) return 'good'; if(value<=100) return 'warn'; return 'bad'; }
@@ -160,21 +228,33 @@ function updateSensorsDisplay(s){
   tempChart.data.datasets[0].data.push(s.temp); tempChart.data.datasets[0].data.shift(); tempChart.update();
   humChart.data.datasets[0].data.push(s.humidity); humChart.data.datasets[0].data.shift(); humChart.update();
   const thpi = computeTHPI(s); setTHPI(thpi);
-  applyCardStatus();
-  function setLight(id,status){const el=document.getElementById(id);if(!el)return;el.style.background=status==='good'?'#22c55e':status==='warn'?'#f59e0b':'#ef4444';el.style.boxShadow='0 0 6px '+el.style.background;}
-  setLight('tl-temp', getStatusFor('temp', sim.temp));
-  setLight('tl-hum', getStatusFor('humidity', sim.humidity));
-  setLight('tl-aqi', getStatusFor('aqi', sim.airQuality));
-  setLight('tl-thpi', getStatusFor('nh3', sim.voc_nh3));
-  setLight('tl-tvoc', getStatusFor('nh3', sim.voc_nh3));
-  setLight('tl-pm', getStatusFor('pm25', sim.pm25));
-  setLight('tl-light', getStatusFor('light', sim.light));
+  applyCardStatus(); applyTrafficLights(s);
 
+    function applyTrafficLights(s){
+      function setTL(id, status){
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.classList.remove('traffic-green','traffic-yellow','traffic-red');
+        if(status==='good') el.classList.add('traffic-green');
+        else if(status==='warn') el.classList.add('traffic-yellow');
+        else el.classList.add('traffic-red');
+      }
+      setTL('tl-temp', getStatusFor('temp', s.temp));
+      setTL('tl-hum', getStatusFor('humidity', s.humidity));
+      setTL('tl-aqi', getStatusFor('aqi', s.airQuality));
+      setTL('tl-thpi', getStatusFor('nh3', s.voc_nh3));
+      // THI compute if available
+      try{ const thiVal = typeof computeTHIFromSensors==='function' ? computeTHIFromSensors(s) : null; if(thiVal!==null) setTL('tl-thi', getStatusFor('thi', thiVal)); }catch(e){}
+      setTL('tl-tvoc', getStatusFor('nh3', s.voc_nh3));
+      setTL('tl-pm', getStatusFor('pm25', s.pm25));
+      setTL('tl-light', getStatusFor('light', s.light));
+    }
   if(s.pm25>55) addLog('PM 2.5 elevated: ' + Math.round(s.pm25) + ' µg/m³','warn');
   if(s.voc_nh3>120) addLog('Elevated NH3: ' + s.voc_nh3.toFixed(1) + ' PPM','warn');
 }
 
-setInterval(()=>{ sim.temp = 27.5 + (Math.random()-0.5)*0.6; sim.humidity = randomWalk(sim.humidity,30,90,1.2,0.5); sim.airQuality = randomWalk(sim.airQuality,30,200,2,1); sim.voc_nh3 = randomWalk(sim.voc_nh3,0,400,4,1); sim.voc_no2 = randomWalk(sim.voc_no2,0,5,0.1,0.05); sim.voc_h2s = randomWalk(sim.voc_h2s,0,10,0.2,0.05); sim.pm25 = randomWalk(sim.pm25,0,120,2,1); sim.pm10 = randomWalk(sim.pm10,0,200,3,1.5); sim.light = randomWalk(sim.light,0,100000,3000,100); sim.noise = randomWalk(sim.noise,30,97,2,1); updateSensorsDisplay(sim); },1800);
+setInterval(()=>{ sim.temp = 27.5 + (Math.random()-0.5)*0.6; sim.humidity = randomWalk(sim.humidity,30,90,1.2,0.5); sim.airQuality = randomWalk(sim.airQuality,30,200,2,1); sim.voc_nh3 = randomWalk(sim.voc_nh3,0,400,4,1); sim.voc_no2 = randomWalk(sim.voc_no2,0,5,0.1,0.05); sim.voc_h2s = randomWalk(sim.voc_h2s,0,10,0.2,0.05); sim.pm25 = randomWalk(sim.pm25,0,120,2,1); sim.pm10 = randomWalk(sim.pm10,0,200,3,1.5); sim.light = randomWalk(sim.light,0,100000,3000,100); sim.noise = randomWalk(sim.noise,30,97,2,1); updateSensorsDisplay(sim);
+      const thi = computeTHIFromSensors(sim); setTHI(thi); },1800);
 
 // logs and producers
 function addLog(msg,type=''){ const logs=document.getElementById('logs'); const now=new Date(); const ts=now.toLocaleTimeString(); const div=document.createElement('div'); div.className='row'+(type? ' '+type:''); div.innerHTML=`<span class="ts">${ts}</span> • ${msg}`; logs.prepend(div); while(logs.children.length>40) logs.removeChild(logs.lastChild); }
@@ -207,6 +287,7 @@ const devList = el('device-list'); devList.innerHTML=''; ['Sensor-01','Sensor-02
 el('clear-logs').addEventListener('click', ()=>{ if(confirm('Clear logs?')) el('logs').innerHTML=''; });
 
 updateSensorsDisplay(sim);
+      const thi = computeTHIFromSensors(sim); setTHI(thi);
 </script>
 </body>
 </html>
