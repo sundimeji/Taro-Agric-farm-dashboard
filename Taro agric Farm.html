@@ -1,384 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Taro Agric Farm — Dashboard + Production Data</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-    :root {
-        --bg: #0f172a;
-        --panel: #111827;
-        --muted: #6b7280;
-        --accent: #22d3ee;
-        --accent-2: #a78bfa;
-        --good: #22c55e;
-        --bad: #ef4444;
-        --warn: #f59e0b;
-    }
-    * { box-sizing: border-box; }
-    body {
-        margin: 0;
-        background: radial-gradient(1200px 600px at 80% -10%, rgba(34,211,238,0.12), transparent),
-            radial-gradient(900px 500px at -10% 20%, rgba(167,139,250,0.12), transparent),
-            var(--bg);
-        color: #e5e7eb;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
-    }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-    .dash-header { position: sticky; top: 0; z-index: 10; background: rgba(17,24,39,.7); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,.06); }
-    .dash-header .container { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .3px; }
-    .brand i { color: var(--accent); }
-    .dash-nav a { color: #cbd5e1; text-decoration: none; margin-left: 18px; padding: 6px 10px; border-radius: 6px; transition: .2s; cursor:pointer }
-    .dash-nav a.active { background: rgba(255,255,255,.06); }
-    .dash-main { padding: 18px 0 40px; }
-    .tabs { display:flex; gap:8px; justify-content:center; margin:12px 0 }
-    .tabs button { background:transparent; border:1px solid rgba(255,255,255,0.04); color:#cbd5e1; padding:8px 12px; border-radius:8px; cursor:pointer }
-    .tabs button.active { background: linear-gradient(180deg, rgba(34,211,238,.06), transparent 60%); color:#fff }
-
-    .dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-    .kpi-card { background: linear-gradient(180deg, rgba(34,211,238,.06), transparent 60%), var(--panel); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; padding: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.25); text-align:left }
-    .kpi-title { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
-    .kpi-value { font-size: 26px; font-weight: 800; margin-top: 6px; }
-    .kpi-trend { margin-top: 8px; font-size: 12px; color: #94a3b8; }
-    .panel { background: var(--panel); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.3); }
-    .panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px }
-    .panel-header i { color: var(--accent-2); }
-    .span-2 { grid-column: span 2; }
-    .device-list { list-style:none; padding:0; margin:0 }
-    .device-list li { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed rgba(255,255,255,.06); }
-
-    .prod-kpi-row { display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:12px }
-    .prod-kpi { background: linear-gradient(180deg, rgba(34,211,238,.03), transparent), var(--panel); border-radius:12px; padding:14px; text-align:center }
-    .prod-kpi .label { font-size:12px; color:#94a3b8; text-transform:uppercase }
-    .prod-kpi .val { font-weight:800; font-size:20px; margin-top:6px }
-
-    table { width:100%; border-collapse: collapse; color:#cbd5e1 }
-    th, td { padding:8px; border-bottom:1px solid rgba(255,255,255,.04); text-align:left }
-    thead th { color:#94a3b8 }
-
-    @media (max-width:1024px){ .dash-grid{grid-template-columns:repeat(2,1fr)} .span-2{grid-column:span 2} .prod-kpi-row{grid-template-columns:repeat(2,1fr)} }
-    @media (max-width:600px){ .dash-grid{grid-template-columns:1fr} .prod-kpi-row{grid-template-columns:1fr} }
-    </style>
+    :root{ --bg:#0f172a; --panel:#111827; --muted:#6b7280; --accent:#22d3ee; --accent-2:#a78bfa; --good:#22c55e; --bad:#ef4444; --warn:#f59e0b; --card-good:rgba(34,197,94,0.12); --card-warn:rgba(245,158,11,0.12); --card-bad:rgba(239,68,68,0.12); }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(1200px 600px at 80% -10%, rgba(34,211,238,0.12), transparent), radial-gradient(900px 500px at -10% 20%, rgba(167,139,250,0.12), transparent), var(--bg); color:#e5e7eb; font-family:Inter,system-ui,Arial;}
+    .container{max-width:1200px;margin:0 auto;padding:0 20px;}
+    .dash-header{position:sticky;top:0;z-index:10;background:rgba(17,24,39,.7);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06)}
+    .dash-header .container{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+    .brand i{color:var(--accent)}
+    .dash-nav a{color:#cbd5e1;text-decoration:none;margin-left:18px;padding:6px 10px;border-radius:6px;cursor:pointer}
+    .tabs{display:flex;gap:8px;justify-content:center;margin:12px 0}
+    .tabs button{background:transparent;border:1px solid rgba(255,255,255,0.04);color:#cbd5e1;padding:8px 12px;border-radius:8px;cursor:pointer}
+    .tabs button.active{background:linear-gradient(180deg, rgba(34,211,238,.06), transparent 60%);color:#fff}
+    .dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .kpi-card{background:linear-gradient(180deg, rgba(34,211,238,.06), transparent 60%),var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.25);text-align:left;transition:box-shadow .25s,border-color .25s}
+    .kpi-card.status-good{box-shadow:0 10px 40px var(--card-good);border-color:var(--card-good)}
+    .kpi-card.status-warn{box-shadow:0 10px 40px var(--card-warn);border-color:var(--card-warn)}
+    .kpi-card.status-bad{box-shadow:0 10px 40px var(--card-bad);border-color:var(--card-bad)}
+    .kpi-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+    .kpi-value{font-size:26px;font-weight:800;margin-top:6px}
+    .kpi-trend{margin-top:8px;font-size:12px;color:#94a3b8}
+    .panel{background:var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .panel-header i{color:var(--accent-2)}
+    .span-2{grid-column:span 2}
+    .device-list{list-style:none;padding:0;margin:0}
+    .device-list li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+    .prod-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+    .prod-kpi{background:linear-gradient(180deg, rgba(34,211,238,.03), transparent),var(--panel);border-radius:12px;padding:14px;text-align:center}
+    .prod-kpi .label{font-size:12px;color:#94a3b8;text-transform:uppercase}
+    .prod-kpi .val{font-weight:800;font-size:20px;margin-top:6px}
+    table{width:100%;border-collapse:collapse;color:#cbd5e1}
+    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.04);text-align:left}
+    thead th{color:#94a3b8}
+    @media(max-width:1024px){.dash-grid{grid-template-columns:repeat(2,1fr)}.span-2{grid-column:span 2}.prod-kpi-row{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.dash-grid{grid-template-columns:1fr}.prod-kpi-row{grid-template-columns:1fr}}
+    .traffic-light{width:12px;height:12px;border-radius:50%;display:inline-block;margin-left:6px;vertical-align:middle}
+.status-good .traffic-light{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.status-warn .traffic-light{background:#f59e0b;box-shadow:0 0 6px #f59e0b}
+.status-bad .traffic-light{background:#ef4444;box-shadow:0 0 6px #ef4444}
+</style>
 </head>
 <body>
-    <header class="dash-header">
-        <div class="container">
-            <div class="brand"><i class="fas fa-signal"></i><span>Taro Agric Farm/AAKTP Dashboard</span></div>
-            <nav class="dash-nav">
-                <a id="nav-home" class="active">Home</a>
-                <a id="nav-production">Production Data</a>
-                <a id="toggle-theme">Theme</a>
-            </nav>
-        </div>
-    </header>
+<header class="dash-header"><div class="container"><div class="brand"><i class="fas fa-signal"></i><span>Taro Agric Farm/AAKTP Dashboard</span></div><nav class="dash-nav"><a id="nav-home" class="active">Home</a><a id="nav-production">Production Data</a><a id="toggle-theme">Theme</a></nav></div></header>
+<div class="tabs container"><button id="tab-home" class="active">Home</button><button id="tab-production">Production Data</button></div>
+<main class="dash-main"><div class="container">
+<section id="home" class="page">
+  <div class="dash-grid" id="home-grid">
+    <div class="kpi-card" id="card-temp"><div class="kpi-title">Temperature <span class="traffic-light" id="tl-temp"></span></div><div class="kpi-value" id="kpi-temp">-- °C</div><div class="kpi-trend" id="kpi-temp-trend">Loading...</div></div>
+    <div class="kpi-card" id="card-hum"><div class="kpi-title">Humidity <span class="traffic-light" id="tl-hum"></span></div><div class="kpi-value" id="kpi-hum">-- %</div><div class="kpi-trend" id="kpi-hum-trend">Loading...</div></div>
+    <div class="kpi-card" id="card-aqi"><div class="kpi-title">Air Quality <span class="traffic-light" id="tl-aqi"></span></div><div class="kpi-value" id="kpi-aqi">-- AQI</div><div class="kpi-trend" id="kpi-aqi-trend">Loading...</div></div>
+    <div class="kpi-card" id="thpi-card" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px"><div style="flex:1"><div class="kpi-title">THPI <span class="traffic-light" id="tl-thpi"></span></div><div class="kpi-value" id="kpi-thpi">--</div><div class="kpi-trend" id="kpi-thpi-trend">Overall index</div></div><div style="width:140px;height:120px;"><canvas id="thpiGauge" width="140" height="120"></canvas></div></div>
 
-    <div class="tabs container">
-      <button id="tab-home" class="active">Home</button>
-      <button id="tab-production">Production Data</button>
-    </div>
+    <div class="panel"><div class="panel-header"><i class="fas fa-thermometer-half"></i><span>Temperature Stream</span></div><canvas id="chart-temp" height="120"></canvas></div>
+    <div class="panel"><div class="panel-header"><i class="fas fa-tint"></i><span>Humidity Stream</span></div><canvas id="chart-hum" height="120"></canvas></div>
 
-    <main class="dash-main">
-      <div class="container">
-        <!-- HOME -->
-        <section id="home" class="page">
-          <div class="dash-grid" id="home-grid">
-            <div class="kpi-card">
-              <div class="kpi-title">Temperature</div>
-              <div class="kpi-value" id="kpi-temp">-- °C</div>
-              <div class="kpi-trend" id="kpi-temp-trend">Loading...</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-title">Humidity</div>
-              <div class="kpi-value" id="kpi-hum">-- %</div>
-              <div class="kpi-trend" id="kpi-hum-trend">Loading...</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-title">Air Quality</div>
-              <div class="kpi-value" id="kpi-aqi">-- AQI</div>
-              <div class="kpi-trend" id="kpi-aqi-trend">Loading...</div>
-            </div>
-            <!-- THPI card replacing removed sensors -->
-            <div class="kpi-card" id="thpi-card" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px">
-              <div style="flex:1">
-                <div class="kpi-title">THPI</div>
-                <div class="kpi-value" id="kpi-thpi">--</div>
-                <div class="kpi-trend" id="kpi-thpi-trend">Overall index</div>
-              </div>
-              <div style="width:140px;height:120px;">
-                <canvas id="thpiGauge" width="140" height="120"></canvas>
-              </div>
-            </div>
+    <div class="panel span-2"><div class="panel-header"><i class="fas fa-wind"></i><span>TVOC Sensor (NH3 / NO2 / H2S)</span><span class="traffic-light" id="tl-tvoc"></span></div><div class="device-list"><li><span>NH3 (Ammonia)</span><span class="badge" id="voc-nh3">0.0 PPM</span></li><li><span>NO2 (Nitrogen Dioxide)</span><span class="badge" id="voc-no2">0.0 PPM</span></li><li><span>H2S (Hydrogen Sulfide)</span><span class="badge" id="voc-h2s">0.0 PPM</span></li></div></div>
 
-            <div class="panel">
-              <div class="panel-header"><i class="fas fa-thermometer-half"></i><span>Temperature Stream</span></div>
-              <canvas id="chart-temp" height="120"></canvas>
-            </div>
+    <div class="panel span-2"><div class="panel-header"><i class="fas fa-smog"></i><span>Particulate Matter</span><span class="traffic-light" id="tl-pm"></span></div><div class="device-list"><li><span>PM 2.5</span><span class="badge" id="pm-25">0 µg/m³</span></li><li><span>PM 10</span><span class="badge" id="pm-10">0 µg/m³</span></li></div></div>
 
-            <div class="panel">
-              <div class="panel-header"><i class="fas fa-tint"></i><span>Humidity Stream</span></div>
-              <canvas id="chart-hum" height="120"></canvas>
-            </div>
+    <div class="panel"><div class="panel-header"><i class="fas fa-sun"></i><span>Light Intensity</span><span class="traffic-light" id="tl-light"></span></div><div class="device-list"><li><span>Illuminance</span><span class="badge" id="light-lux">0 lux</span></li></div></div>
 
-            <div class="panel span-2">
-              <div class="panel-header"><i class="fas fa-wind"></i><span>TVOC Sensor (NH3 / NO2 / H2S)</span></div>
-              <div class="device-list">
-                <li><span>NH3 (Ammonia)</span><span class="badge" id="voc-nh3">0.0 PPM</span></li>
-                <li><span>NO2 (Nitrogen Dioxide)</span><span class="badge" id="voc-no2">0.0 PPM</span></li>
-                <li><span>H2S (Hydrogen Sulfide)</span><span class="badge" id="voc-h2s">0.0 PPM</span></li>
-              </div>
-            </div>
+    <div class="panel"><div class="panel-header"><i class="fas fa-volume-up"></i><span>Noise Levels</span></div><div class="device-list"><li><span>Sound Pressure</span><span class="badge" id="noise-db">0 dB</span></li><li><span>Peak</span><span class="badge" id="noise-peak">0 dB</span></li><li><span>Average</span><span class="badge" id="noise-avg">0 dB</span></li></div></div>
 
-            <div class="panel span-2">
-              <div class="panel-header"><i class="fas fa-smog"></i><span>Particulate Matter</span></div>
-              <div class="device-list">
-                <li><span>PM 2.5</span><span class="badge" id="pm-25">0 µg/m³</span></li>
-                <li><span>PM 10</span><span class="badge" id="pm-10">0 µg/m³</span></li>
-              </div>
-            </div>
+    <div class="panel span-2"><div class="panel-header"><i class="fas fa-microphone"></i><span>Microphone (Audio Recording)</span></div><div class="logs" id="mic-log"><div class="row"><span class="ts">[00:00:01]</span><span class="msg">Microphone activated</span></div></div></div>
 
-            <div class="panel">
-              <div class="panel-header"><i class="fas fa-sun"></i><span>Light Intensity</span></div>
-              <div class="device-list"><li><span>Illuminance</span><span class="badge" id="light-lux">0 lux</span></li></div>
-            </div>
+    <div class="panel"><div class="panel-header"><i class="fas fa-map-marker-alt"></i><span>Device Status</span></div><ul class="device-list" id="device-list"><li><span>Sensor-01</span><span class="badge online">online</span></li></ul></div>
 
-            <div class="panel">
-              <div class="panel-header"><i class="fas fa-volume-up"></i><span>Noise Levels</span></div>
-              <div class="device-list">
-                <li><span>Sound Pressure</span><span class="badge" id="noise-db">0 dB</span></li>
-                <li><span>Peak</span><span class="badge" id="noise-peak">0 dB</span></li>
-                <li><span>Average</span><span class="badge" id="noise-avg">0 dB</span></li>
-              </div>
-            </div>
+    <div class="panel span-2"><div class="panel-header"><i class="fas fa-list"></i><span>Event Logs</span><div class="panel-actions"><button class="btn-sm" id="clear-logs">Clear</button><button class="btn-sm" id="download-csv">Download CSV</button><button class="btn-sm" id="download-sensors-csv">Download Sensors CSV</button></div></div><div class="logs" id="logs" style="height:320px;"></div></div>
 
-            <div class="panel span-2">
-              <div class="panel-header"><i class="fas fa-microphone"></i><span>Microphone (Audio Recording)</span></div>
-              <div class="logs" id="mic-log"><div class="row"><span class="ts">[00:00:01]</span><span class="msg">Microphone activated</span></div></div>
-            </div>
+  </div>
+</section>
 
-            <div class="panel">
-              <div class="panel-header"><i class="fas fa-map-marker-alt"></i><span>Device Status</span></div>
-              <ul class="device-list" id="device-list"><li><span>Sensor-01</span><span class="badge online">online</span></li></ul>
-            </div>
+<section id="production" class="page" style="display:none;margin-top:12px">
+  <div class="prod-kpi-row"><div class="prod-kpi"><div class="label">Birds Alive</div><div class="val" id="kp-birds-alive">0</div></div><div class="prod-kpi"><div class="label">Birds Dead</div><div class="val" id="kp-birds-dead">0</div></div><div class="prod-kpi"><div class="label">FCR</div><div class="val" id="kp-fcr">—</div></div><div class="prod-kpi"><div class="label">Birds Sold</div><div class="val" id="kp-birds-sold">—</div></div></div>
 
-            <div class="panel span-2">
-              <div class="panel-header"><i class="fas fa-list"></i><span>Event Logs</span><div class="panel-actions"><button class="btn-sm" id="clear-logs">Clear</button><button class="btn-sm" id="download-csv">Download CSV</button><button class="btn-sm" id="download-sensors-csv">Download Sensors CSV</button></div></div>
-              <div class="logs" id="logs" style="height:320px;"></div>
-            </div>
+  <div class="panel"><h3>Batch Summary</h3><table><tbody><tr><th>Concurrent batches</th><td id="v-concurrent">0</td></tr><tr><th>Batch no</th><td id="v-batchno">—</td></tr><tr><th>Population</th><td id="v-pop">0 birds</td></tr><tr><th>Died</th><td id="v-died">0 birds</td></tr><tr><th>Mortality rate</th><td id="v-mort">0%</td></tr><tr><th>Age</th><td id="v-age">— days</td></tr><tr><th>Average weight</th><td id="v-weight">0 g</td></tr><tr><th>Feed consumed (per bird)</th><td id="v-feed">0 g</td></tr><tr><th>FCR</th><td id="v-fcr">—</td></tr><tr><th>Sold</th><td id="v-sold"></td></tr></tbody></table></div>
 
-          </div>
-        </section>
+  <div class="panel" style="margin-top:12px"><h3>Batch History</h3><div style="overflow:auto;max-height:320px"><table style="width:100%"><thead><tr><th>Batch</th><th>Population</th><th>Died</th><th>Mortality</th><th>Age</th><th>Avg wt (g)</th><th>Feed (g)</th><th>FCR</th><th>Sold</th><th>Actions</th></tr></thead><tbody id="historyBody"></tbody></table></div><div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end"><button id="btn-add" class="btn-sm">Add</button><button id="btn-clear" class="btn-sm">Clear</button><button id="btn-export" class="btn-sm">Export CSV</button></div></div>
+</section>
 
-        <!-- PRODUCTION -->
-        <section id="production" class="page" style="display:none;margin-top:12px">
-          <div class="prod-kpi-row">
-            <div class="prod-kpi"><div class="label">Birds Alive</div><div class="val" id="kp-birds-alive">0</div></div>
-            <div class="prod-kpi"><div class="label">Birds Dead</div><div class="val" id="kp-birds-dead">0</div></div>
-            <div class="prod-kpi"><div class="label">FCR</div><div class="val" id="kp-fcr">—</div></div>
-            <div class="prod-kpi"><div class="label">Birds Sold</div><div class="val" id="kp-birds-sold">—</div></div>
-          </div>
+</div></main>
 
-          <div class="panel">
-            <h3>Batch Summary</h3>
-            <table>
-              <tbody>
-                <tr><th>Concurrent batches</th><td id="v-concurrent">0</td></tr>
-                <tr><th>Batch no</th><td id="v-batchno">—</td></tr>
-                <tr><th>Population</th><td id="v-pop">0 birds</td></tr>
-                <tr><th>Died</th><td id="v-died">0 birds</td></tr>
-                <tr><th>Mortality rate</th><td id="v-mort">0%</td></tr>
-                <tr><th>Age</th><td id="v-age">— days</td></tr>
-                <tr><th>Average weight</th><td id="v-weight">0 g</td></tr>
-                <tr><th>Feed consumed (per bird)</th><td id="v-feed">0 g</td></tr>
-                <tr><th>FCR</th><td id="v-fcr">—</td></tr>
-                <tr><th>Sold</th><td id="v-sold"></td></tr>
-              </tbody>
-            </table>
-          </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function el(id){return document.getElementById(id);}
+function setText(id,txt){const e=el(id); if(e) e.textContent=txt;}
+// tabs
+const tabHome = el('tab-home'), tabProd = el('tab-production'), pageHome = el('home'), pageProd = el('production');
+function showHome(){tabHome.classList.add('active'); tabProd.classList.remove('active'); pageHome.style.display='block'; pageProd.style.display='none';}
+function showProd(){tabProd.classList.add('active'); tabHome.classList.remove('active'); pageProd.style.display='block'; pageHome.style.display='none';}
+tabHome.addEventListener('click', showHome); tabProd.addEventListener('click', showProd);
+showHome();
 
-          <div class="panel" style="margin-top:12px">
-            <h3>Batch History</h3>
-            <div style="overflow:auto;max-height:320px">
-              <table style="width:100%"><thead><tr><th>Batch</th><th>Population</th><th>Died</th><th>Mortality</th><th>Age</th><th>Avg wt (g)</th><th>Feed (g)</th><th>FCR</th><th>Sold</th><th>Actions</th></tr></thead><tbody id="historyBody"></tbody></table>
-            </div>
-            <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end"><button id="btn-add" class="btn-sm">Add</button><button id="btn-clear" class="btn-sm">Clear</button><button id="btn-export" class="btn-sm">Export CSV</button></div>
-          </div>
-        </section>
+// charts
+const tempChart = new Chart(el('chart-temp'), { type:'line', data:{ labels:Array(20).fill(''), datasets:[{ data:Array(20).fill(0), borderColor:'#e74c3c', backgroundColor:'#e74c3c33', tension:0.4, pointRadius:0, borderWidth:3 }] }, options:{ animation:false, responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ display:false } } } });
+const humChart = new Chart(el('chart-hum'), { type:'line', data:{ labels:Array(20).fill(''), datasets:[{ data:Array(20).fill(0), borderColor:'#3498db', backgroundColor:'#3498db33', tension:0.4, pointRadius:0, borderWidth:3 }] }, options:{ animation:false, responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ display:false } } } });
 
-      </div>
-    </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    // --- core helpers ---
-    function el(id){ return document.getElementById(id); }
-    function setText(id, txt){ const e = el(id); if(e) e.textContent = txt; }
-
-    // --- tab handling ---
-    const tabHome = el('tab-home'), tabProd = el('tab-production'), pageHome = el('home'), pageProd = el('production');
-    function showHome(){ tabHome.classList.add('active'); tabProd.classList.remove('active'); pageHome.style.display='block'; pageProd.style.display='none'; }
-    function showProd(){ tabProd.classList.add('active'); tabHome.classList.remove('active'); pageProd.style.display='block'; pageHome.style.display='none'; }
-    tabHome.addEventListener('click', showHome); tabProd.addEventListener('click', showProd);
-    // show home by default
-    showHome();
-
-    // --- charts ---
-    const tempChart = new Chart(el('chart-temp'), { type:'line', data:{ labels:Array(20).fill(''), datasets:[{ data:Array(20).fill(0), borderColor:'#e74c3c', backgroundColor:'#e74c3c33', tension:0.4, pointRadius:0, borderWidth:3 }] }, options:{ animation:false, responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ display:false } } } });
-    const humChart = new Chart(el('chart-hum'), { type:'line', data:{ labels:Array(20).fill(''), datasets:[{ data:Array(20).fill(0), borderColor:'#3498db', backgroundColor:'#3498db33', tension:0.4, pointRadius:0, borderWidth:3 }] }, options:{ animation:false, responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ display:false } } } });
-
-    // --- THPI Gauge (segment gauge with pointer) ---
-    const thpiCtx = el('thpiGauge').getContext('2d');
-    // create doughnut with 3 colored segments (good/moderate/poor) and a hidden dataset for value
-    const thpiGauge = new Chart(thpiCtx, {
-      type: 'doughnut',
-      data: {
-        labels:['Good','Moderate','Poor'],
-        datasets:[{ data:[40,20,40], backgroundColor:['#22c55e','#f59e0b','#ef4444'], borderWidth:0, hoverOffset:0 }]
-      },
-      options: {
-        circumference: 180 * Math.PI/180,
-        rotation: 180 * Math.PI/180,
-        cutout: '70%',
-        responsive: false,
-        plugins:{ legend:{ display:false }, tooltip:{ enabled:false } }
-      },
-      plugins: [{
-        id: 'thpiPointer',
-        afterDraw(chart){
-          const value = chart.$value ?? 0; // 0-100
-          const ctx = chart.ctx;
-          const cw = chart.width, ch = chart.height;
-          const cx = chart.getDatasetMeta(0).data[0].x; // center
-          const cy = chart.getDatasetMeta(0).data[0].y;
-          const r = chart.getDatasetMeta(0).data[0].outerRadius;
-          // angle mapping: 180deg (left) -> 0, 0deg (right) -> 100
-          const angle = Math.PI - (value/100)*Math.PI; // between PI and 0
-          // pointer
-          ctx.save();
-          ctx.translate(cx, cy);
-          ctx.rotate(angle);
-          ctx.beginPath();
-          ctx.moveTo(0, -6);
-          ctx.lineTo(r*0.6, 0);
-          ctx.lineTo(0, 6);
-          ctx.fillStyle = '#111827';
-          ctx.fill();
-          // pointer tip circle
-          ctx.beginPath();
-          ctx.arc(r*0.62, 0, 4, 0, 2*Math.PI);
-          ctx.fillStyle = '#fff';
-          ctx.fill();
-          ctx.restore();
-          // draw center text
-          ctx.fillStyle = '#e5e7eb';
-          ctx.font = '700 18px Inter, Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(String(Math.round(value)), cx, cy+20);
-        }
-      }]
-    });
-
-    function setTHPI(v){ thpiGauge.$value = Math.max(0, Math.min(100, v)); thpiGauge.draw(); setText('kpi-thpi', Math.round(v)); const status = v>=80? 'Good' : v>=60? 'Moderate' : 'Poor'; setText('kpi-thpi-trend', status); }
-
-    // --- sensor simulation (only kept sensors) ---
-    let sim = { temp:27.5, humidity:55, airQuality:80, voc_nh3:48, voc_no2:3, voc_h2s:0.5, pm25:18, pm10:22, light:400, noise:45 };
-    function randomWalk(prev, min, max, step=1, jitter=0.2){ let next = prev + (Math.random()-0.5)*step + (Math.random()-0.5)*jitter; if(next<min) next=min+Math.random(); if(next>max) next=max-Math.random(); return +next.toFixed(2); }
-
-    function computeTHPI(s){
-      // simple heuristic: combine comfort scores
-      // temp score: ideal 20-28 -> best; map to 0-100
-      const t = s.temp; let tScore = 0; if(t<=20) tScore = 60 - (20-t)*2; else if(t<=28) tScore = 100; else tScore = Math.max(0, 100 - (t-28)*6);
-      // humidity ideal 40-70
-      const h = s.humidity; let hScore = 0; if(h>=40 && h<=70) hScore=100; else if(h<40) hScore = Math.max(0, 100 - (40-h)*2); else hScore = Math.max(0, 100 - (h-70)*2);
-      // air quality: lower is better. assume 0-200 -> map 0=>100,200=>0
-      const a = s.airQuality; let aScore = Math.max(0, Math.min(100, 100 - (a/200)*100));
-      // particulate penalty from pm2.5 & pm10
-      const p25 = s.pm25, p10 = s.pm10; const pScore = Math.max(0, Math.min(100, 100 - (p25/120)*100));
-      // weighted average
-      const score = (tScore*0.25 + hScore*0.2 + aScore*0.35 + pScore*0.2);
-      return score;
+// THPI
+const thpiCtx = el('thpiGauge').getContext('2d');
+const thpiGauge = new Chart(thpiCtx, {
+  type:'doughnut',
+  data:{ labels:['Good','Moderate','Poor'], datasets:[{ data:[40,20,40], backgroundColor:['#22c55e','#f59e0b','#ef4444'], borderWidth:0 }]},
+  options:{ circumference: Math.PI, rotation: Math.PI, cutout:'70%', responsive:false, plugins:{legend:{display:false}, tooltip:{enabled:false}} },
+  plugins:[{
+    id:'thpiPointer',
+    afterDraw(chart){
+      const value = chart.$value ?? 0;
+      const ctx = chart.ctx; const cx = chart.getDatasetMeta(0).data[0].x; const cy = chart.getDatasetMeta(0).data[0].y; const r = chart.getDatasetMeta(0).data[0].outerRadius;
+      const angle = Math.PI - (value/100)*Math.PI;
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(angle); ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(r*0.6,0); ctx.lineTo(0,6); ctx.fillStyle='#111827'; ctx.fill();
+      ctx.beginPath(); ctx.arc(r*0.62,0,4,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill(); ctx.restore();
+      ctx.fillStyle='#e5e7eb'; ctx.font='700 18px Inter, Arial'; ctx.textAlign='center'; ctx.fillText(String(Math.round(value)), cx, cy+20);
     }
+  }]
+});
+function setTHPI(v){ thpiGauge.$value = Math.max(0,Math.min(100,v)); thpiGauge.draw(); setText('kpi-thpi', Math.round(v)); const status = v>=80? 'Good' : v>=60? 'Moderate' : 'Poor'; setText('kpi-thpi-trend', status); }
 
-    function updateSensorsDisplay(s){
-      setText('kpi-temp', s.temp.toFixed(1) + ' °C');
-      setText('kpi-hum', s.humidity.toFixed(0) + ' %');
-      setText('kpi-aqi', s.airQuality.toFixed(0) + ' AQI');
-      setText('voc-nh3', s.voc_nh3.toFixed(1) + ' PPM');
-      setText('voc-no2', s.voc_no2.toFixed(2) + ' PPM');
-      setText('voc-h2s', s.voc_h2s.toFixed(2) + ' PPM');
-      setText('pm-25', Math.round(s.pm25) + ' µg/m³');
-      setText('pm-10', Math.round(s.pm10) + ' µg/m³');
-      setText('light-lux', Math.round(s.light) + ' lux');
-      setText('noise-db', Math.round(s.noise) + ' dB');
-      // update charts
-      tempChart.data.datasets[0].data.push(s.temp); tempChart.data.datasets[0].data.shift(); tempChart.update();
-      humChart.data.datasets[0].data.push(s.humidity); humChart.data.datasets[0].data.shift(); humChart.update();
-      // THPI
-      const thpi = computeTHPI(s); setTHPI(thpi);
-      // logs for thresholds
-      if(s.pm25>55) addLog('PM 2.5 elevated: ' + Math.round(s.pm25) + ' µg/m³','warn');
-      if(s.voc_nh3>120) addLog('Elevated NH3: ' + s.voc_nh3.toFixed(1) + ' PPM','warn');
-    }
+// simulation
+let sim = { temp:27.5, humidity:55, airQuality:80, voc_nh3:48, voc_no2:3, voc_h2s:0.5, pm25:18, pm10:22, light:400, noise:45 };
+function randomWalk(prev,min,max,step=1,jitter=0.2){ let next = prev + (Math.random()-0.5)*step + (Math.random()-0.5)*jitter; if(next<min) next=min+Math.random(); if(next>max) next=max-Math.random(); return +next.toFixed(2); }
+function computeTHPI(s){ const t=s.temp; let tScore=0; if(t<=20) tScore=60-(20-t)*2; else if(t<=28) tScore=100; else tScore=Math.max(0,100-(t-28)*6); const h=s.humidity; let hScore=0; if(h>=40&&h<=70) hScore=100; else if(h<40) hScore=Math.max(0,100-(40-h)*2); else hScore=Math.max(0,100-(h-70)*2); const a=s.airQuality; let aScore=Math.max(0,Math.min(100,100-(a/200)*100)); const p25=s.pm25; const pScore=Math.max(0,Math.min(100,100-(p25/120)*100)); return (tScore*0.25 + hScore*0.2 + aScore*0.35 + pScore*0.2); }
 
-    // run simulator
-    setInterval(()=>{
-      sim.temp = 27.5 + (Math.random()-0.5)*0.6;
-      sim.humidity = randomWalk(sim.humidity, 30, 90, 1.2, 0.5);
-      sim.airQuality = randomWalk(sim.airQuality, 30, 200, 2, 1);
-      sim.voc_nh3 = randomWalk(sim.voc_nh3, 0, 400, 4, 1);
-      sim.voc_no2 = randomWalk(sim.voc_no2, 0, 5, 0.1, 0.05);
-      sim.voc_h2s = randomWalk(sim.voc_h2s, 0, 10, 0.2, 0.05);
-      sim.pm25 = randomWalk(sim.pm25, 0, 120, 2, 1);
-      sim.pm10 = randomWalk(sim.pm10, 0, 200, 3, 1.5);
-      sim.light = randomWalk(sim.light, 0, 100000, 3000, 100);
-      sim.noise = randomWalk(sim.noise, 30, 97, 2, 1);
-      updateSensorsDisplay(sim);
-    }, 1800);
+function getStatusFor(sensor,value){
+  if(sensor==='temp'){ if(value>=20&&value<=30) return 'good'; if((value>30&&value<=35)||(value<20&&value>=15)) return 'warn'; return 'bad'; }
+  if(sensor==='humidity'){ if(value>=40&&value<=75) return 'good'; if((value>=30&&value<40)||(value>75&&value<=85)) return 'warn'; return 'bad'; }
+  if(sensor==='aqi'){ if(value<=50) return 'good'; if(value<=100) return 'warn'; return 'bad'; }
+  if(sensor==='nh3'){ if(value<=25) return 'good'; if(value<=50) return 'warn'; return 'bad'; }
+  if(sensor==='light'){ if(value>=150&&value<=1000) return 'good'; if((value>=50&&value<150)||(value>1000&&value<=2000)) return 'warn'; return 'bad'; }
+  return 'good';
+}
+function setCardClass(cardId,status){ const elc = document.getElementById(cardId); if(!elc) return; elc.classList.remove('status-good','status-warn','status-bad'); if(status==='good') elc.classList.add('status-good'); if(status==='warn') elc.classList.add('status-warn'); if(status==='bad') elc.classList.add('status-bad'); }
 
-    // --- Production records (localStorage) ---
-    const PKEY = 'taro_prod_records_v2';
-    function loadRecords(){ const raw = localStorage.getItem(PKEY); return raw? JSON.parse(raw): []; }
-    function saveRecords(r){ localStorage.setItem(PKEY, JSON.stringify(r)); }
+function applyCardStatus(){
+  setCardClass('card-temp', getStatusFor('temp', sim.temp));
+  setCardClass('card-hum', getStatusFor('humidity', sim.humidity));
+  setCardClass('card-aqi', getStatusFor('aqi', sim.airQuality));
+  // NH3 card: tie to thpi card styling? create card-nh3 not present; we'll style thpi card instead for NH3 visibility
+  setCardClass('thpi-card', getStatusFor('nh3', sim.voc_nh3)); // subtle: thpi-card used to reflect gas status too
+  setCardClass('card-light', getStatusFor('light', sim.light));
+}
 
-    function renderHistory(){ const body = el('historyBody'); if(!body) return; const records = loadRecords(); body.innerHTML=''; records.slice().reverse().forEach((r, idx)=>{ const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.batch||'—'}</td><td>${r.population||0}</td><td>${r.died||0}</td><td>${((r.mortality||0)*100).toFixed(2)}%</td><td>${r.age||'—'}</td><td>${r.weight||0}</td><td>${r.feed||0}</td><td>${r.fcr||'—'}</td><td>${r.sold||'—'}</td><td><button data-id='${records.length-1-idx}' class='edit'>Edit</button> <button data-id='${records.length-1-idx}' class='del'>Delete</button></td>`; body.appendChild(tr); }); renderSummary();
-      // attach handlers
-      body.querySelectorAll('.edit').forEach(b=>b.onclick = e=>{ const id = Number(e.target.dataset.id); editRecord(id); });
-      body.querySelectorAll('.del').forEach(b=>b.onclick = e=>{ const id = Number(e.target.dataset.id); deleteRecord(id); });
-    }
+function updateSensorsDisplay(s){
+  setText('kpi-temp', s.temp.toFixed(1) + ' °C');
+  setText('kpi-hum', s.humidity.toFixed(0) + ' %');
+  setText('kpi-aqi', s.airQuality.toFixed(0) + ' AQI');
+  setText('voc-nh3', s.voc_nh3.toFixed(1) + ' PPM');
+  setText('voc-no2', s.voc_no2.toFixed(2) + ' PPM');
+  setText('voc-h2s', s.voc_h2s.toFixed(2) + ' PPM');
+  setText('pm-25', Math.round(s.pm25) + ' µg/m³');
+  setText('pm-10', Math.round(s.pm10) + ' µg/m³');
+  setText('light-lux', Math.round(s.light) + ' lux');
+  setText('noise-db', Math.round(s.noise) + ' dB');
+  tempChart.data.datasets[0].data.push(s.temp); tempChart.data.datasets[0].data.shift(); tempChart.update();
+  humChart.data.datasets[0].data.push(s.humidity); humChart.data.datasets[0].data.shift(); humChart.update();
+  const thpi = computeTHPI(s); setTHPI(thpi);
+  applyCardStatus();
+  function setLight(id,status){const el=document.getElementById(id);if(!el)return;el.style.background=status==='good'?'#22c55e':status==='warn'?'#f59e0b':'#ef4444';el.style.boxShadow='0 0 6px '+el.style.background;}
+  setLight('tl-temp', getStatusFor('temp', sim.temp));
+  setLight('tl-hum', getStatusFor('humidity', sim.humidity));
+  setLight('tl-aqi', getStatusFor('aqi', sim.airQuality));
+  setLight('tl-thpi', getStatusFor('nh3', sim.voc_nh3));
+  setLight('tl-tvoc', getStatusFor('nh3', sim.voc_nh3));
+  setLight('tl-pm', getStatusFor('pm25', sim.pm25));
+  setLight('tl-light', getStatusFor('light', sim.light));
 
-    function renderSummary(){ const records = loadRecords(); if(records.length===0){ setText('v-concurrent','0'); setText('v-batchno','—'); setText('v-pop','0 birds'); setText('v-died','0 birds'); setText('v-mort','0%'); setText('v-age','— days'); setText('v-weight','0 g'); setText('v-feed','0 g'); setText('v-fcr','—'); setText('v-sold','—'); setText('kp-birds-alive','0'); setText('kp-birds-dead','0'); setText('kp-fcr','—'); setText('kp-birds-sold','—'); return; } const latest = records[records.length-1]; setText('v-concurrent', records.length); setText('v-batchno', latest.batch||'—'); setText('v-pop', (latest.population||0) + ' birds'); setText('v-died', (latest.died||0) + ' birds'); setText('v-mort', ((latest.mortality||0)*100).toFixed(2) + '%'); setText('v-age', (latest.age||'—') + ' days'); setText('v-weight', (latest.weight||0) + ' g'); setText('v-feed', (latest.feed||0) + ' g'); setText('v-fcr', latest.fcr||'—'); setText('v-sold', latest.sold||'—'); setText('kp-birds-alive', ((latest.population||0) - (latest.died||0) - (Number(latest.sold)||0)) || 0); setText('kp-birds-dead', latest.died||0); setText('kp-fcr', latest.fcr||'—'); setText('kp-birds-sold', latest.sold||'—'); }
+  if(s.pm25>55) addLog('PM 2.5 elevated: ' + Math.round(s.pm25) + ' µg/m³','warn');
+  if(s.voc_nh3>120) addLog('Elevated NH3: ' + s.voc_nh3.toFixed(1) + ' PPM','warn');
+}
 
-    function addRecord(rec){ const r = loadRecords(); r.push(rec); saveRecords(r); renderHistory(); }
-    function editRecord(id){ const records = loadRecords(); const rec = records[id]; if(!rec) return alert('Not found'); const batch = prompt('Batch no', rec.batch); if(batch===null) return; rec.batch = batch; rec.population = Number(prompt('Population', rec.population))||rec.population; rec.died = Number(prompt('Died', rec.died))||rec.died; rec.age = Number(prompt('Age', rec.age))||rec.age; rec.weight = Number(prompt('Avg weight (g)', rec.weight))||rec.weight; rec.feed = Number(prompt('Feed consumed per bird (g)', rec.feed))||rec.feed; rec.sold = prompt('Sold', rec.sold)||rec.sold; rec.mortality = (rec.died/rec.population)||0; rec.fcr = rec.feed && rec.weight ? (rec.feed/rec.weight).toFixed(2) : rec.fcr; saveRecords(records); renderHistory(); }
-    function deleteRecord(id){ if(!confirm('Delete record?')) return; const r = loadRecords(); r.splice(id,1); saveRecords(r); renderHistory(); }
+setInterval(()=>{ sim.temp = 27.5 + (Math.random()-0.5)*0.6; sim.humidity = randomWalk(sim.humidity,30,90,1.2,0.5); sim.airQuality = randomWalk(sim.airQuality,30,200,2,1); sim.voc_nh3 = randomWalk(sim.voc_nh3,0,400,4,1); sim.voc_no2 = randomWalk(sim.voc_no2,0,5,0.1,0.05); sim.voc_h2s = randomWalk(sim.voc_h2s,0,10,0.2,0.05); sim.pm25 = randomWalk(sim.pm25,0,120,2,1); sim.pm10 = randomWalk(sim.pm10,0,200,3,1.5); sim.light = randomWalk(sim.light,0,100000,3000,100); sim.noise = randomWalk(sim.noise,30,97,2,1); updateSensorsDisplay(sim); },1800);
 
-    // add button
-    el('btn-add').addEventListener('click', ()=>{
-      const batch = prompt('Batch no (e.g., 8)'); if(!batch) return; const population = Number(prompt('Population (birds)', 1974))||0; const died = Number(prompt('Died (birds)', 0))||0; const age = Number(prompt('Age (days)', 14))||0; const weight = Number(prompt('Average weight (g)', 453))||0; const feed = Number(prompt('Feed consumed (g per bird)', 467))||0; const sold = prompt('Sold', 'nil')||'nil'; const mortality = population? (died/population):0; const fcr = (feed && weight)? Number((feed/weight).toFixed(2)) : '—'; addRecord({ batch, population, died, age, weight, feed, sold, mortality, fcr, created:new Date().toISOString() }); alert('Record saved'); });
-    el('btn-clear').addEventListener('click', ()=>{ if(confirm('Clear all production records?')){ localStorage.removeItem(PKEY); renderHistory(); } });
-    el('btn-export').addEventListener('click', ()=>{ const rows = loadRecords(); let csv = 'Batch,Population,Died,Mortality,Age,Weight,Feed,FCR,Sold\\n'; rows.forEach(r=>{ csv += `${r.batch},${r.population},${r.died},${((r.mortality||0)*100).toFixed(2)}%,${r.age},${r.weight},${r.feed},${r.fcr},${r.sold}\\n`; }); const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'production_history.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); });
+// logs and producers
+function addLog(msg,type=''){ const logs=document.getElementById('logs'); const now=new Date(); const ts=now.toLocaleTimeString(); const div=document.createElement('div'); div.className='row'+(type? ' '+type:''); div.innerHTML=`<span class="ts">${ts}</span> • ${msg}`; logs.prepend(div); while(logs.children.length>40) logs.removeChild(logs.lastChild); }
 
-    // initial render
-    renderHistory();
+const PKEY='taro_prod_records_v2';
+function loadRecords(){ const raw = localStorage.getItem(PKEY); return raw? JSON.parse(raw):[]; }
+function saveRecords(r){ localStorage.setItem(PKEY, JSON.stringify(r)); }
+function renderHistory(){ const body = el('historyBody'); if(!body) return; const records = loadRecords(); body.innerHTML=''; records.slice().reverse().forEach((r, idx)=>{ const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.batch||'—'}</td><td>${r.population||0}</td><td>${r.died||0}</td><td>${((r.mortality||0)*100).toFixed(2)}%</td><td>${r.age||'—'}</td><td>${r.weight||0}</td><td>${r.feed||0}</td><td>${r.fcr||'—'}</td><td>${r.sold||'—'}</td><td><button data-id='${records.length-1-idx}' class='edit'>Edit</button> <button data-id='${records.length-1-idx}' class='del'>Delete</button></td>`; body.appendChild(tr); }); renderSummary();
+ body.querySelectorAll('.edit').forEach(b=>b.onclick=e=>{ const id=Number(e.target.dataset.id); editRecord(id); });
+ body.querySelectorAll('.del').forEach(b=>b.onclick=e=>{ const id=Number(e.target.dataset.id); deleteRecord(id); });
+}
+function renderSummary(){ const records=loadRecords(); if(records.length===0){ setText('v-concurrent','0'); setText('v-batchno','—'); setText('v-pop','0 birds'); setText('v-died','0 birds'); setText('v-mort','0%'); setText('v-age','— days'); setText('v-weight','0 g'); setText('v-feed','0 g'); setText('v-fcr','—'); setText('v-sold','—'); setText('kp-birds-alive','0'); setText('kp-birds-dead','0'); setText('kp-fcr','—'); setText('kp-birds-sold','—'); return;} const latest=records[records.length-1]; setText('v-concurrent', records.length); setText('v-batchno', latest.batch||'—'); setText('v-pop', (latest.population||0)+' birds'); setText('v-died', (latest.died||0)+' birds'); setText('v-mort', ((latest.mortality||0)*100).toFixed(2)+'%'); setText('v-age', (latest.age||'—')+' days'); setText('v-weight', (latest.weight||0)+' g'); setText('v-feed', (latest.feed||0)+' g'); setText('v-fcr', latest.fcr||'—'); setText('v-sold', latest.sold||'—'); setText('kp-birds-alive', ((latest.population||0)-(latest.died||0)-(Number(latest.sold)||0))||0); setText('kp-birds-dead', latest.died||0); setText('kp-fcr', latest.fcr||'—'); setText('kp-birds-sold', latest.sold||'—'); }
 
-    // --- logs CSV / sensors CSV handlers (safe newline usage) ---
-    el('download-csv').addEventListener('click', ()=>{
-      const logs = document.querySelectorAll('#logs .row'); let csv = 'Time,Message\\n'; logs.forEach(row=>{ const ts = row.querySelector('.ts')?.textContent.replace(/[\\[\\]]/g,'')||''; const msg = row.textContent.replace(ts,'').replace('•','').trim().replace(/"/g,'""'); csv += `\"${ts}\",\"${msg}\"\\n`; }); const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'event_logs.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    });
+function addRecord(rec){ const r=loadRecords(); r.push(rec); saveRecords(r); renderHistory(); }
+function editRecord(id){ const records=loadRecords(); const rec=records[id]; if(!rec) return alert('Not found'); const batch=prompt('Batch no', rec.batch); if(batch===null) return; rec.batch=batch; rec.population=Number(prompt('Population', rec.population))||rec.population; rec.died=Number(prompt('Died', rec.died))||rec.died; rec.age=Number(prompt('Age', rec.age))||rec.age; rec.weight=Number(prompt('Avg weight (g)', rec.weight))||rec.weight; rec.feed=Number(prompt('Feed consumed per bird (g)', rec.feed))||rec.feed; rec.sold=prompt('Sold', rec.sold)||rec.sold; rec.mortality=(rec.died/rec.population)||0; rec.fcr=rec.feed&&rec.weight?(rec.feed/rec.weight).toFixed(2):rec.fcr; saveRecords(records); renderHistory(); }
+function deleteRecord(id){ if(!confirm('Delete record?')) return; const r=loadRecords(); r.splice(id,1); saveRecords(r); renderHistory(); }
 
-    el('download-sensors-csv').addEventListener('click', ()=>{
-      const s = sim; let csv = 'Sensor,Value\\n'; const keys = ['temp','humidity','airQuality','voc_nh3','voc_no2','voc_h2s','pm25','pm10','light','noise']; keys.forEach(k=>{ csv += `${k},${s[k] || ''}\\n`; }); const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'sensor_data.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    });
+el('btn-add').addEventListener('click', ()=>{ const batch=prompt('Batch no (e.g., 8)'); if(!batch) return; const population=Number(prompt('Population (birds)',1974))||0; const died=Number(prompt('Died (birds)',0))||0; const age=Number(prompt('Age (days)',14))||0; const weight=Number(prompt('Average weight (g)',453))||0; const feed=Number(prompt('Feed consumed (g per bird)',467))||0; const sold=prompt('Sold','nil')||'nil'; const mortality=population? (died/population):0; const fcr=(feed&&weight)? Number((feed/weight).toFixed(2)) : '—'; addRecord({batch,population,died,age,weight,feed,sold,mortality,fcr,created:new Date().toISOString()}); alert('Record saved');});
+el('btn-clear').addEventListener('click', ()=>{ if(confirm('Clear all production records?')){ localStorage.removeItem(PKEY); renderHistory(); }});
+el('btn-export').addEventListener('click', ()=>{ const rows=loadRecords(); let csv='Batch,Population,Died,Mortality,Age,Weight,Feed,FCR,Sold\\n'; rows.forEach(r=>{ csv += `${r.batch},${r.population},${r.died},${((r.mortality||0)*100).toFixed(2)}%,${r.age},${r.weight},${r.feed},${r.fcr},${r.sold}\\n`; }); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='production_history.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); });
 
-    // device status
-    const devList = el('device-list'); devList.innerHTML=''; ['Sensor-01','Sensor-02','Sensor-03','Gateway-A'].forEach(n=>{ const li = document.createElement('li'); li.innerHTML = `<span>${n}</span><span class='badge online'>online</span>`; devList.appendChild(li); });
+renderHistory();
 
-    // clear logs
-    el('clear-logs').addEventListener('click', ()=>{ if(confirm('Clear logs?')) el('logs').innerHTML=''; });
+el('download-csv').addEventListener('click', ()=>{ const logs=document.querySelectorAll('#logs .row'); let csv='Time,Message\\n'; logs.forEach(row=>{ const ts=row.querySelector('.ts')?.textContent.replace(/[\\[\\]]/g,'')||''; const msg=row.textContent.replace(ts,'').replace('•','').trim().replace(/"/g,'""'); csv += `\"${ts}\",\"${msg}\"\\n`; }); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='event_logs.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); });
 
-    // set initial demo sensor display
-    updateSensorsDisplay(sim);
-    </script>
+el('download-sensors-csv').addEventListener('click', ()=>{ const s=sim; let csv='Sensor,Value\\n'; const keys=['temp','humidity','airQuality','voc_nh3','voc_no2','voc_h2s','pm25','pm10','light','noise']; keys.forEach(k=>{ csv += `${k},${s[k] || ''}\\n`; }); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='sensor_data.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); });
+
+const devList = el('device-list'); devList.innerHTML=''; ['Sensor-01','Sensor-02','Sensor-03','Gateway-A'].forEach(n=>{ const li=document.createElement('li'); li.innerHTML=`<span>${n}</span><span class='badge online'>online</span>`; devList.appendChild(li); });
+
+el('clear-logs').addEventListener('click', ()=>{ if(confirm('Clear logs?')) el('logs').innerHTML=''; });
+
+updateSensorsDisplay(sim);
+</script>
 </body>
 </html>
