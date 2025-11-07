@@ -85,6 +85,7 @@
     .login-form{display:flex;flex-direction:column;gap:16px}
     .login-form .modal-input{margin-top:4px}
     .auth-error{color:#ef4444;font-size:12px;margin-top:4px}
+    .otp-note{margin-top:8px;font-size:12px;color:#94a3b8;line-height:1.5}
     .protected-message{text-align:center;padding:40px 20px;color:#94a3b8}
     .protected-message i{font-size:48px;color:var(--accent);margin-bottom:16px;display:block}
     </style>
@@ -185,9 +186,18 @@ function showModal(title, body, buttons) {
       const button = document.createElement('button');
       button.className = 'modal-btn' + (btn.className ? ' ' + btn.className : '');
       button.textContent = btn.text;
-      button.onclick = () => {
-        hideModal();
-        if (btn.onclick) btn.onclick();
+      button.onclick = async () => {
+        const shouldAutoClose = btn?.closeOnClick !== false;
+        if (shouldAutoClose) {
+          hideModal();
+        }
+        if (btn.onclick) {
+          try {
+            await btn.onclick();
+          } catch (err) {
+            console.error('Modal button handler error:', err);
+          }
+        }
       };
       modalFooter.appendChild(button);
     });
@@ -289,7 +299,6 @@ async function showProd(){
   const isAuthenticated = await checkAuth();
   
   if (!isAuthenticated) {
-    await customAlert('Please login to access production data');
     showLoginModal();
     return;
   }
@@ -878,6 +887,14 @@ function addLog(msg, type='') {
 const SUPABASE_URL = 'https://lgqjjabzzdjwfqhwvmva.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxncWpqYWJ6emRqd2ZxaHd2bXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NTk5MzcsImV4cCI6MjA3ODAzNTkzN30.01JGXuqV1FqfHxObRI6OfMwVLWnaOqQFgTLWez3oKM8';
 
+const OTP_ALLOWED_EMAILS = new Set([
+  'soseni@oauife.edu.ng',
+  'olamideakintaro@gmail.com',
+  'hbashiru@oauife.edu.ng',
+  'ajayiayobamiayodeji@gmail.com',
+  'suninterlinktech@gmail.com'
+].map(email => email.toLowerCase()));
+
 let supabaseClient = null;
 
 // Initialize Supabase client after page loads
@@ -959,99 +976,185 @@ function updateAuthUI(user) {
 // Show login modal
 function showLoginModal() {
   const emailId = 'login-email-' + Date.now();
-  const passwordId = 'login-password-' + Date.now();
   const errorId = 'login-error-' + Date.now();
   
   const body = `
     <div class="login-form">
       <div>
         <label class="modal-label">Email</label>
-        <input type="email" id="${emailId}" class="modal-input" placeholder="your@email.com" autofocus>
-      </div>
-      <div>
-        <label class="modal-label">Password</label>
-        <input type="password" id="${passwordId}" class="modal-input" placeholder="••••••••">
+        <input type="email" id="${emailId}" class="modal-input" placeholder="name@example.com" autofocus>
       </div>
       <div id="${errorId}" class="auth-error" style="display:none"></div>
+      <p class="otp-note">Enter your authorized email address to receive a one-time login code.</p>
     </div>
   `;
   
-  showModal('Login Required', body, [
+  showModal('Secure Login', body, [
     {
       text: 'Cancel',
       onclick: () => {}
     },
     {
-      text: 'Login',
+      text: 'Send OTP',
       className: 'primary',
+      closeOnClick: false,
       onclick: async () => {
         const email = document.getElementById(emailId).value;
-        const password = document.getElementById(passwordId).value;
         const errorDiv = document.getElementById(errorId);
-        
-        if (!email || !password) {
-          errorDiv.textContent = 'Please enter both email and password';
-          errorDiv.style.display = 'block';
-          return;
-        }
-        
-        errorDiv.style.display = 'none';
-        await handleLogin(email, password, errorDiv);
+        await handleOtpRequest(email, errorDiv);
       }
     }
   ]);
   
   // Handle Enter key
   setTimeout(() => {
-    const passwordInput = document.getElementById(passwordId);
-    if (passwordInput) {
-      passwordInput.onkeydown = async (e) => {
+    const emailInput = document.getElementById(emailId);
+    if (emailInput) {
+      emailInput.onkeydown = async (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
-          const email = document.getElementById(emailId).value;
-          const password = passwordInput.value;
           const errorDiv = document.getElementById(errorId);
-          
-          if (!email || !password) {
-            errorDiv.textContent = 'Please enter both email and password';
-            errorDiv.style.display = 'block';
-            return;
-          }
-          
-          errorDiv.style.display = 'none';
-          await handleLogin(email, password, errorDiv);
+          await handleOtpRequest(emailInput.value, errorDiv);
         }
       };
     }
   }, 100);
 }
 
-// Handle login
-async function handleLogin(email, password, errorDiv) {
+function isOtpEmailAllowed(email) {
+  if (!email) return false;
+  return OTP_ALLOWED_EMAILS.has(email.trim().toLowerCase());
+}
+
+async function handleOtpRequest(email, errorDiv) {
+  const cleanEmail = (email || '').trim();
+
+  if (!cleanEmail) {
+    errorDiv.textContent = 'Please enter the email address where the OTP should be sent';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  if (!isOtpEmailAllowed(cleanEmail)) {
+    errorDiv.textContent = 'This email is not authorized for login. Please contact the administrator.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
   if (!supabaseClient) {
     errorDiv.textContent = 'Supabase not initialized';
     errorDiv.style.display = 'block';
     return;
   }
-  
+
   try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email: email,
-      password: password
+    errorDiv.style.display = 'none';
+    const { error } = await supabaseClient.auth.signInWithOtp({
+      email: cleanEmail,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: window.location.origin + window.location.pathname,
+        emailOtpType: 'code'
+      }
     });
-    
+
     if (error) throw error;
-    
-    if (data.user) {
+
+    addLog('OTP email sent: ' + cleanEmail, '');
+    hideModal();
+    showOtpVerificationModal(cleanEmail);
+  } catch (err) {
+    console.error('OTP request error:', err);
+    errorDiv.textContent = err.message || 'Unable to send OTP at the moment. Please try again shortly.';
+    errorDiv.style.display = 'block';
+  }
+}
+
+function showOtpVerificationModal(email) {
+  const codeId = 'otp-code-' + Date.now();
+  const errorId = 'otp-error-' + Date.now();
+
+  const body = `
+    <div class="login-form">
+      <p class="otp-note">Enter the login code sent to <strong>${email}</strong>.</p>
+      <input type="text" id="${codeId}" class="modal-input" placeholder="12345678" inputmode="numeric" pattern="[0-9]*" maxlength="10">
+      <div id="${errorId}" class="auth-error" style="display:none"></div>
+    </div>
+  `;
+
+  showModal('Verify OTP', body, [
+    {
+      text: 'Cancel',
+      onclick: () => {}
+    },
+    {
+      text: 'Verify',
+      className: 'primary',
+      closeOnClick: false,
+      onclick: async () => {
+        const code = document.getElementById(codeId)?.value;
+        const errorDiv = document.getElementById(errorId);
+        await handleOtpVerify(email, code, errorDiv);
+      }
+    }
+  ]);
+
+  setTimeout(() => {
+    const input = document.getElementById(codeId);
+    if (input) input.focus();
+  }, 100);
+}
+
+async function handleOtpVerify(email, code, errorDiv) {
+  if (!supabaseClient) {
+    errorDiv.textContent = 'Supabase not initialized';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  if (!isOtpEmailAllowed(email)) {
+    errorDiv.textContent = 'This email is not authorized for login. Please contact the administrator.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  const cleanCode = (code || '').trim();
+
+  if (!cleanCode) {
+    errorDiv.textContent = 'Please enter the login code from your email.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  if (!/^\d{6,10}$/.test(cleanCode)) {
+    errorDiv.textContent = 'Login code should be 6 to 10 digits.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  try {
+    errorDiv.style.display = 'none';
+    const { data, error } = await supabaseClient.auth.verifyOtp({
+      email: email.trim(),
+      token: cleanCode,
+      type: 'email'
+    });
+
+    if (error) throw error;
+
+    if (data?.user) {
       currentUser = data.user;
       updateAuthUI(data.user);
       hideModal();
-      addLog('User logged in: ' + email, '');
-      await checkAuth(); // Refresh auth state
+      addLog('User logged in via OTP: ' + email, '');
+      await checkAuth();
+    } else {
+      errorDiv.textContent = 'Unable to verify the OTP. Please double-check the code or use the magic link.';
+      errorDiv.style.display = 'block';
     }
   } catch (err) {
-    console.error('Login error:', err);
-    errorDiv.textContent = err.message || 'Login failed. Please check your credentials.';
+    console.error('OTP verification error:', err);
+    errorDiv.textContent = err.message || 'OTP verification failed. Please try again.';
     errorDiv.style.display = 'block';
   }
 }
@@ -1117,11 +1220,14 @@ const PKEY='taro_prod_records_v2';
 const PROD_TABLE = 'production_records'; // Supabase table name
 
 // Load records from localStorage (fallback) or Supabase
-async function loadRecords(){ 
+async function loadRecords(options = {}){ 
+  const { promptForLogin = true } = options;
+
   // Check authentication first
   if (!currentUser) {
-    await customAlert('Please login to access production data');
-    showLoginModal();
+    if (promptForLogin) {
+      showLoginModal();
+    }
     return [];
   }
   
@@ -1151,11 +1257,14 @@ async function loadRecords(){
 }
 
 // Save records to both Supabase and localStorage
-async function saveRecords(r){ 
+async function saveRecords(r, options = {}){ 
+  const { promptForLogin = true } = options;
+
   // Check authentication first
   if (!currentUser) {
-    await customAlert('Please login to save production data');
-    showLoginModal();
+    if (promptForLogin) {
+      showLoginModal();
+    }
     return;
   }
   
@@ -1224,7 +1333,7 @@ async function saveRecords(r){
 async function renderHistory(){ 
   const body = el('historyBody'); 
   if(!body) return; 
-  const records = await loadRecords(); 
+  const records = await loadRecords({ promptForLogin: false }); 
   body.innerHTML=''; 
   records.slice().reverse().forEach((r, idx)=>{ 
     const tr = document.createElement('tr'); 
@@ -1237,7 +1346,7 @@ async function renderHistory(){
 }
 
 async function renderSummary(){ 
-  const records = await loadRecords(); 
+  const records = await loadRecords({ promptForLogin: false }); 
   if(records.length===0){ 
     setText('v-concurrent','0'); 
     setText('v-batchno','—'); 
